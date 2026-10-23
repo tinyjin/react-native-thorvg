@@ -15,6 +15,7 @@ export class Scene extends Paint {
     const jsi = getJSI();
     checkResult(jsi.tvg_scene_add(this.handle, paint.handle), 'add');
     jsi.tvg_paint_ref(paint.handle);
+    paint._retains++;
     return this;
   }
 

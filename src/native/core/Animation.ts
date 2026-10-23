@@ -145,9 +145,13 @@ export class Animation extends NativeObject {
     this.#info = null;
 
     if (this.#picture) {
-      this.#picture.resolver(null);
-      this.#picture._owner = null;
+      const picture = this.#picture;
+      picture.resolver(null);
+      picture._owner = null;
       this.#picture = null;
+      for (; picture._retains > 0; picture._retains--) {
+        getJSI().tvg_paint_unref(picture.handle, false);
+      }
     }
 
     super.dispose();

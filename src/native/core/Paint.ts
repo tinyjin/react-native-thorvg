@@ -18,6 +18,9 @@ export abstract class Paint extends NativeObject {
     paintFactories.set(type, factory);
   }
 
+  /** @internal */
+  public _retains = 0;
+
   protected _cleanup(handle: Handle): void {
     getJSI().tvg_paint_unref(handle, true);
   }
