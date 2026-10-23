@@ -7,6 +7,13 @@ import { useCanvasSize } from './useCanvasSize';
 
 type CanvasElement = ConstructorParameters<typeof WebCanvas>[0];
 
+function fit(element: CanvasElement | null): void {
+  const style = (element as { style?: Record<string, string> } | null)?.style;
+  if (!style) return;
+  style.width = '100%';
+  style.height = '100%';
+}
+
 export function Canvas({
   ref,
   width,
@@ -34,6 +41,7 @@ export function Canvas({
       enableDevicePixelRatio,
       engineOption,
     });
+    fit(element);
     canvasRef.current = canvas;
     assignRef(target, canvas);
     return () => {
@@ -46,7 +54,9 @@ export function Canvas({
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || size.width <= 0 || size.height <= 0) return;
-    canvas.resize(size.width, size.height).render();
+    canvas.resize(size.width, size.height);
+    fit(elementRef.current);
+    canvas.render();
   }, [size.width, size.height]);
 
   return (
