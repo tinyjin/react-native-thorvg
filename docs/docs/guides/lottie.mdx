@@ -3,12 +3,12 @@ title: Lottie
 sidebar_position: 3
 ---
 
-ThorVG includes a Lottie runtime, so Lottie animations play on a canvas without another package.
+ThorVG includes a Lottie runtime, so Lottie animations play on a canvas without another package. With components, use [`LottieAnimation`](../components/animation). With the WebCanvas API:
 
 ```tsx
 useEffect(() => {
-  const canvas = canvasRef.current;
-  if (!TVG || !canvas) return;
+  if (!TVG) return;
+  const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
 
   const animation = new TVG.LottieAnimation();
   animation.load(JSON.stringify(lottieJson));
@@ -19,7 +19,10 @@ useEffect(() => {
 
   animation.play(() => canvas.update().render());
 
-  return () => animation.dispose();
+  return () => {
+    animation.dispose();
+    canvas.destroy();
+  };
 }, [TVG]);
 ```
 

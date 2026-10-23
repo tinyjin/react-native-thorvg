@@ -1,20 +1,18 @@
 import { useCallback, useLayoutEffect, useState } from 'react';
 import type { LayoutChangeEvent } from 'react-native';
 import ThorVGView from '../specs/ThorVGViewNativeComponent';
-import type { CanvasProps } from '../types';
+import type { CanvasViewProps } from '../types';
 import { assignRef } from './assignRef';
 import { CanvasTarget } from './CanvasTarget';
 
-export type Canvas = CanvasTarget;
-
 let nextSurfaceId = 1;
 
-export function Canvas({
+export function CanvasView({
   ref,
   androidBackingView,
   onLayout,
   ...rest
-}: CanvasProps) {
+}: CanvasViewProps) {
   const [surface] = useState(() => new CanvasTarget(nextSurfaceId++));
 
   useLayoutEffect(() => {

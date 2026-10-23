@@ -1,0 +1,31 @@
+---
+title: Paint properties
+sidebar_position: 3
+---
+
+Every paint component (`Rect`, `Circle`, `Path`, `Scene`, `Picture`, `Text`, `Animation` and `LottieAnimation`) takes these props. They set the WebCanvas `Paint` methods of the same name.
+
+| Prop | WebCanvas | Description |
+| --- | --- | --- |
+| `translate` | `translate()` | `{ x, y }` offset |
+| `rotate` | `rotate()` | Rotation in degrees |
+| `scale` | `scale()` | Scale factor |
+| `transform` | `transform()` | `Matrix`. Replaces `translate`, `rotate` and `scale` |
+| `opacity` | `opacity()` | 0 to 255. Default `255` |
+| `visible` | `visible()` | Default `true` |
+| `blend` | `blend()` | `BlendMethod` |
+
+```tsx
+<Rect
+  x={-50}
+  y={-50}
+  width={100}
+  height={100}
+  fill="#22c55e"
+  translate={{ x: 150, y: 150 }}
+  rotate={45}
+  opacity={200}
+/>
+```
+
+`rotate` and `scale` apply around the origin of the paint, so draw around `0, 0` and move it with `translate` to rotate in place.

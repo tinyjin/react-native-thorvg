@@ -1,0 +1,54 @@
+---
+title: Picture
+sidebar_position: 7
+---
+
+`Picture` draws SVG, PNG, JPG, WebP, Lottie and raw image data. Its `ref` receives the WebCanvas `Picture`.
+
+![Picture](/img/components/picture.png)
+
+```tsx
+import { Canvas, Picture } from '@thorvg/react-native-thorvg';
+
+<Canvas width={600} height={600}>
+  <Picture
+    data={svg}
+    options={{ type: 'svg' }}
+    size={{ width: 300, height: 300 }}
+  />
+  <Picture
+    data={png}
+    options={{ type: 'png' }}
+    size={{ width: 260, height: 260 }}
+    translate={{ x: 320, y: 320 }}
+  />
+</Canvas>
+```
+
+| Prop | WebCanvas | Description |
+| --- | --- | --- |
+| `data` | `load(data)` | `Uint8Array` or string |
+| `options` | `load(data, options)` | `{ type, width, height, colorSpace }`. `width`, `height` and `colorSpace` are for `'raw'` data |
+| `size` | `size()` | `{ width, height }` to draw at |
+| `origin` | `origin()` | `{ x, y }` reference point from 0 to 1. `{ x: 0.5, y: 0.5 }` is the center |
+| `filter` | `filter()` | `FilterMethod` for scaling |
+| `accessible` | `accessible` | Keeps the IDs of SVG nodes for `ref.current.paint(id)` |
+| `resolver` | `resolver()` | `AssetResolver` for external assets |
+
+Changing `data` or `options` loads a new picture. Load the data with `fetch` or a bundled asset and pass it when it is ready:
+
+```tsx
+const [svg, setSvg] = useState<string>();
+
+useEffect(() => {
+  fetch(url)
+    .then((res) => res.text())
+    .then(setSvg);
+}, []);
+
+return (
+  <Canvas width={300} height={300}>
+    {svg && <Picture data={svg} options={{ type: 'svg' }} />}
+  </Canvas>
+);
+```

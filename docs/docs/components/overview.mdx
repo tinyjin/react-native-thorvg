@@ -1,0 +1,121 @@
+---
+title: Overview
+sidebar_position: 1
+---
+
+The components draw with ThorVG without any setup. Render them inside `Canvas`, and the canvas draws its children in order, from back to front.
+
+```tsx
+import { Canvas, Circle, Rect } from '@thorvg/react-native-thorvg';
+
+const Example = () => (
+  <Canvas width={300} height={300}>
+    <Rect x={0} y={0} width={300} height={300} fill="#1e1e1e" />
+    <Circle cx={150} cy={150} rx={100} fill="#2563eb" />
+  </Canvas>
+);
+```
+
+ThorVG is initialized by the first `Canvas` that mounts. To choose the renderer, call `init({ renderer })` or `useThorVG({ renderer })` before it.
+
+## Components
+
+| Component | WebCanvas class | Page |
+| --- | --- | --- |
+| `Rect`, `Circle`, `Path` | `Shape` | [Shapes](./shapes) |
+| `Scene` | `Scene` | [Scene](./scene) |
+| `LinearGradient`, `RadialGradient`, `ConicGradient` | Gradients | [Gradients](./gradients) |
+| `Clip`, `Mask` | `clip()`, `mask()` | [Clip and mask](./masking) |
+| `Picture` | `Picture` | [Picture](./picture) |
+| `Text`, `Font` | `Text`, `Font` | [Text](./text) |
+| `Animation`, `LottieAnimation` | `Animation`, `LottieAnimation` | [Animation](./animation) |
+
+Every paint component also takes the [paint properties](./paint) such as `translate`, `rotate` and `opacity`.
+
+## Canvas
+
+| Prop | Description |
+| --- | --- |
+| `width`, `height` | Drawing size. Without `style`, also the size of the view. Defaults to the layout size of the view |
+| `enableDevicePixelRatio` | Renders at the device pixel ratio. Default `true` |
+| `engineOption` | `EngineOption` value for the engine |
+| `viewport` | `{ x, y, width, height }` region of the canvas to draw |
+| `androidBackingView` | `'TextureView'` (default) or `'SurfaceView'`. Android only |
+| `ref` | Receives the `Canvas` view. See [Refs](#refs) |
+
+All other `View` props are passed to the view. With `style`, the drawing is scaled to fill the view:
+
+```tsx
+<Canvas width={600} height={600} style={{ width: '100%', aspectRatio: 1 }}>
+  {/* draw in a 600 × 600 space at any screen width */}
+</Canvas>
+```
+
+Without children, `Canvas` is only the view for the [WebCanvas API](../guides/canvas).
+
+## Updates
+
+Props are compared by value, so a new object with the same values is not applied again. The canvas draws at most once per frame. State and effects work as in any React component:
+
+```tsx
+const [angle, setAngle] = useState(0);
+
+return (
+  <Canvas width={300} height={300}>
+    <Rect
+      x={-50}
+      y={-50}
+      width={100}
+      height={100}
+      fill="#22c55e"
+      translate={{ x: 150, y: 150 }}
+      rotate={angle}
+    />
+  </Canvas>
+);
+```
+
+React context from outside `Canvas` does not reach its children. Pass values as props instead.
+
+## Refs
+
+A component `ref` receives its WebCanvas instance, so the components and the [WebCanvas API](../guides/canvas) can be combined.
+
+| Component | `ref` |
+| --- | --- |
+| `Rect`, `Circle`, `Path` | `Shape` |
+| `Scene`, `Picture`, `Text` | `Scene`, `Picture`, `Text` |
+| `Animation`, `LottieAnimation` | `Animation`, `LottieAnimation` |
+| `Canvas` | The view. `ref.current.canvas` is the WebCanvas `Canvas` |
+
+Changes made through a ref are drawn with `canvas.update().render()`:
+
+```tsx
+const canvas = useRef<Canvas>(null);
+const rect = useRef<Shape>(null);
+
+const onPress = () => {
+  rect.current?.translate(100, 0);
+  canvas.current?.canvas?.update().render();
+};
+
+return (
+  <Canvas ref={canvas} width={300} height={300}>
+    <Rect ref={rect} x={0} y={0} width={100} height={100} fill="#f43f5e" />
+  </Canvas>
+);
+```
+
+A prop overrides what a ref changed the next time that prop changes.
+
+## Colors
+
+`fill`, `stroke.color` and effect colors take a hex string (`'#2563eb'`, `'#2563eb80'`) or an `[r, g, b, a]` array with values from 0 to 255.
+
+## Enums
+
+`BlendMethod`, `FillRule`, `MaskMethod`, `StrokeCap`, `StrokeJoin`, `PathCommand`, `TextWrapMode` and the other WebCanvas enums are exported from the package:
+
+```ts
+import { MaskMethod, StrokeCap } from '@thorvg/react-native-thorvg';
+```

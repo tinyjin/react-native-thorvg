@@ -1,0 +1,47 @@
+---
+title: Clip and mask
+sidebar_position: 6
+---
+
+`Clip` and `Mask` are children of a paint and hold one paint. `Clip` calls `clip()` and `Mask` calls `mask()` on the parent with that paint.
+
+![Clip and mask](/img/components/masking.png)
+
+```tsx
+import {
+  Canvas,
+  Circle,
+  Clip,
+  Mask,
+  MaskMethod,
+  Rect,
+  Scene,
+} from '@thorvg/react-native-thorvg';
+
+<Canvas width={600} height={600}>
+  <Scene>
+    {stripes.map((y) => (
+      <Rect key={y} x={0} y={y} width={600} height={25} fill="#f472b6" />
+    ))}
+    <Clip>
+      <Circle cx={160} cy={300} rx={130} />
+    </Clip>
+  </Scene>
+  <Rect x={320} y={170} width={260} height={260} fill="#38bdf8">
+    <Mask method={MaskMethod.InvAlpha}>
+      <Circle cx={450} cy={300} rx={90} fill="#ffffff" />
+    </Mask>
+  </Rect>
+</Canvas>
+```
+
+| Component | WebCanvas | Props |
+| --- | --- | --- |
+| `Clip` | `clip(clipper)` | The clipping paint as the child |
+| `Mask` | `mask(target, method)` | `method`: `MaskMethod`, and the masking paint as the child |
+
+The clip or mask paint is not drawn itself.
+
+:::note
+Removing a `Clip` or a `Mask` does not reset the parent, because WebCanvas has no method to remove them. Change the `key` of the parent to draw it again without one.
+:::

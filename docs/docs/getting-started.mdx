@@ -6,7 +6,7 @@ sidebar_position: 1
 
 `@thorvg/react-native-thorvg` brings [ThorVG](https://github.com/thorvg/thorvg) vector graphics and Lottie to React Native on Android, iOS and web.
 
-The drawing API is the [`@thorvg/webcanvas`](https://www.npmjs.com/package/@thorvg/webcanvas) API. On web the package runs `@thorvg/webcanvas` itself. On Android and iOS the same classes run on the native ThorVG engine through JSI, so the same code draws the same result on every platform.
+It offers two APIs. The components draw declaratively with JSX. The [`@thorvg/webcanvas`](https://www.npmjs.com/package/@thorvg/webcanvas) API draws imperatively. On web the package runs `@thorvg/webcanvas` itself. On Android and iOS the same classes run on the native ThorVG engine through JSI, so the same code draws the same result on every platform.
 
 ## Requirements
 
@@ -31,11 +31,35 @@ npx expo prebuild
 ## Your first canvas
 
 ```tsx
+import { Canvas, Rect } from '@thorvg/react-native-thorvg';
+
+const Example = () => (
+  <Canvas width={200} height={160}>
+    <Rect
+      x={20}
+      y={20}
+      width={160}
+      height={120}
+      rx={16}
+      ry={16}
+      fill="#2563eb"
+    />
+  </Canvas>
+);
+
+export default Example;
+```
+
+The [components](./components/overview) draw without any setup. `Canvas` initializes ThorVG and draws its children in order.
+
+The same drawing with the [WebCanvas API](./guides/canvas):
+
+```tsx
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG } from '@thorvg/react-native-thorvg';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const view = useRef<Canvas>(null);
 
   useEffect(() => {
@@ -43,7 +67,9 @@ const Example = () => {
     const canvas = new TVG.Canvas(view, { width: 200, height: 160 });
 
     const shape = new TVG.Shape();
-    shape.appendRect(20, 20, 160, 120, { rx: 16, ry: 16 }).fill(37, 99, 235, 255);
+    shape
+      .appendRect(20, 20, 160, 120, { rx: 16, ry: 16 })
+      .fill(37, 99, 235, 255);
     canvas.add(shape).render();
 
     return () => canvas.destroy();
@@ -51,14 +77,12 @@ const Example = () => {
 
   return <Canvas ref={view} style={{ width: 200, height: 160 }} />;
 };
-
-export default Example;
 ```
 
-`useThorVG()` returns `null` until ThorVG is ready and then the ThorVG namespace (`TVG`). The `Canvas` component provides the view to draw into. `new TVG.Canvas(view, options)` creates a WebCanvas `Canvas` on it, with the same methods such as `add`, `update` and `render`.
+`useThorVG()` returns `null` until ThorVG is ready and then the ThorVG namespace (`TVG`). `new TVG.Canvas(view, options)` creates a WebCanvas `Canvas` on the view, with the same methods such as `add`, `update` and `render`. Both can be combined through [refs](./components/overview#refs).
 
 ## Next steps
 
-- [Canvas](./guides/canvas) explains sizing, lifecycle and touch input.
-- [Animation](./guides/animation) shows how to update a scene every frame.
-- [Examples](./examples) runs 55 examples in the browser with their full source.
+- [Components](./components/overview) covers every component and its props.
+- [Canvas](./guides/canvas) explains sizing, lifecycle and touch input with the WebCanvas API.
+- [Examples](./examples) runs the examples in the browser with their full source.

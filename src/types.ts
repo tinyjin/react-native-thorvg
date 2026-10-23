@@ -7,13 +7,17 @@ import type {
   InitOptions as WebCanvasInitOptions,
   ThorVGNamespace,
 } from '@thorvg/webcanvas';
-import type { CanvasRef, CanvasTarget } from './components/CanvasTarget';
+import type { CanvasRef, CanvasTarget } from './canvas/CanvasTarget';
 
 export type AndroidBackingView = 'TextureView' | 'SurfaceView';
 
-export interface CanvasProps extends ViewProps {
+export interface CanvasViewProps extends ViewProps {
   ref?: Ref<CanvasTarget>;
   androidBackingView?: AndroidBackingView;
+}
+
+export interface CanvasProps extends CanvasViewProps, CanvasOptions {
+  viewport?: { x: number; y: number; width: number; height: number };
 }
 
 export type ThorVG = Omit<ThorVGNamespace, 'Canvas' | 'Video'> & {

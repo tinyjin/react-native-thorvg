@@ -92,7 +92,11 @@ export function ExampleList({
         >
           <View style={styles.thumbnail}>
             <Image
-              source={{ uri: ASSETS + item.thumbnail }}
+              source={
+                typeof item.thumbnail === 'string'
+                  ? { uri: ASSETS + item.thumbnail }
+                  : item.thumbnail
+              }
               style={styles.thumbnailImage}
               resizeMode="cover"
             />

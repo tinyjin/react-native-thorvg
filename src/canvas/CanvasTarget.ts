@@ -1,6 +1,17 @@
 import type { RefObject } from 'react';
+import type { Canvas } from '@thorvg/webcanvas';
 
 type LayoutListener = (width: number, height: number) => void;
+
+const canvases = new WeakMap<CanvasTarget, Canvas>();
+
+export function bindCanvas(target: CanvasTarget, canvas: Canvas): void {
+  canvases.set(target, canvas);
+}
+
+export function unbindCanvas(target: CanvasTarget, canvas: Canvas): void {
+  if (canvases.get(target) === canvas) canvases.delete(target);
+}
 
 export class CanvasTarget {
   readonly surfaceId: number;
@@ -11,6 +22,10 @@ export class CanvasTarget {
 
   constructor(surfaceId: number) {
     this.surfaceId = surfaceId;
+  }
+
+  get canvas(): Canvas | null {
+    return canvases.get(this) ?? null;
   }
 
   get width(): number {

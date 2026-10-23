@@ -1,0 +1,59 @@
+---
+title: Gradients
+sidebar_position: 5
+---
+
+A gradient is a child of a shape or a `Text`. It fills the parent, or strokes it with `stroke`.
+
+```tsx
+import {
+  Canvas,
+  Circle,
+  LinearGradient,
+  RadialGradient,
+  Rect,
+} from '@thorvg/react-native-thorvg';
+
+<Canvas width={600} height={600}>
+  <Circle cx={450} cy={150} rx={110}>
+    <RadialGradient
+      cx={450}
+      cy={150}
+      r={110}
+      stops={[
+        [0, [255, 255, 255, 255]],
+        [1, [255, 90, 60, 255]],
+      ]}
+    />
+  </Circle>
+  <Rect x={40} y={330} width={220} height={220} stroke={{ width: 14 }}>
+    <LinearGradient
+      stroke
+      x1={40}
+      y1={330}
+      x2={260}
+      y2={550}
+      stops={[
+        [0, [0, 255, 170, 255]],
+        [1, [0, 120, 255, 255]],
+      ]}
+    />
+  </Rect>
+</Canvas>
+```
+
+| Component | WebCanvas | Props |
+| --- | --- | --- |
+| `LinearGradient` | `LinearGradient` | `x1`, `y1`, `x2`, `y2` |
+| `RadialGradient` | `RadialGradient` | `cx`, `cy`, `r`, `fx?`, `fy?`, `fr?` |
+| `ConicGradient` | `ConicGradient` | `cx`, `cy`, `angle?` |
+
+All gradients take:
+
+| Prop | WebCanvas | Description |
+| --- | --- | --- |
+| `stops` | `setStops()` | `[offset, [r, g, b, a]]` entries with offsets from 0 to 1 |
+| `spread` | `spread()` | `GradientSpread` |
+| `stroke` | `stroke({ gradient })` | Strokes the parent instead of filling it. Shapes only |
+
+Gradients have no `ref`, because a gradient set on a paint belongs to that paint and is rebuilt when its props change.

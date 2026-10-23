@@ -18,8 +18,8 @@ Use `requestAnimationFrame` and stop it when the component unmounts:
 
 ```tsx
 useEffect(() => {
-  const canvas = canvasRef.current;
-  if (!TVG || !canvas) return;
+  if (!TVG) return;
+  const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
   let rafId = 0;
 
   const shape = new TVG.Shape();
@@ -34,7 +34,10 @@ useEffect(() => {
   };
   rafId = requestAnimationFrame(animate);
 
-  return () => cancelAnimationFrame(rafId);
+  return () => {
+    cancelAnimationFrame(rafId);
+    canvas.destroy();
+  };
 }, [TVG]);
 ```
 
@@ -54,8 +57,8 @@ When the effect awaits a download, check that the component is still mounted bef
 
 ```tsx
 useEffect(() => {
-  const canvas = canvasRef.current;
-  if (!TVG || !canvas) return;
+  if (!TVG) return;
+  const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
   let active = true;
 
   (async () => {
@@ -69,6 +72,7 @@ useEffect(() => {
 
   return () => {
     active = false;
+    canvas.destroy();
   };
 }, [TVG]);
 ```

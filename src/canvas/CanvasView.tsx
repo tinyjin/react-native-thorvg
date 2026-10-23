@@ -1,18 +1,16 @@
 import { createElement, useCallback, useLayoutEffect, useState } from 'react';
 import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
-import type { CanvasProps } from '../types';
+import type { CanvasViewProps } from '../types';
 import { assignRef } from './assignRef';
 import { CanvasTarget } from './CanvasTarget';
 
-export type Canvas = CanvasTarget;
-
-export function Canvas({
+export function CanvasView({
   ref,
   androidBackingView: _androidBackingView,
   onLayout,
   style,
   ...rest
-}: CanvasProps) {
+}: CanvasViewProps) {
   const [surface] = useState(() => new CanvasTarget(0));
 
   useLayoutEffect(() => {

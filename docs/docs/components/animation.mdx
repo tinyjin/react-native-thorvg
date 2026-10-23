@@ -1,0 +1,52 @@
+---
+title: Animation
+sidebar_position: 9
+---
+
+`LottieAnimation` plays a Lottie animation, and `Animation` plays any animation ThorVG can load. Their `ref` receives the WebCanvas `LottieAnimation` or `Animation`, and the [paint properties](./paint) apply to its picture.
+
+![Lottie](/img/components/lottie.png)
+
+```tsx
+import { Canvas, LottieAnimation } from '@thorvg/react-native-thorvg';
+
+<Canvas width={600} height={600}>
+  <LottieAnimation
+    data={json}
+    size={{ width: 500, height: 500 }}
+    translate={{ x: 50, y: 50 }}
+    playing
+    loop
+  />
+</Canvas>
+```
+
+| Prop | WebCanvas | Description |
+| --- | --- | --- |
+| `data` | `load()` | Animation data as a string or `Uint8Array` |
+| `size` | `picture.size()` | `{ width, height }` to draw at |
+| `playing` | `play()`, `pause()` | Plays while `true` |
+| `loop` | `setLoop()` | Repeats the animation |
+| `frame` | `frame()` | Moves to a frame |
+| `segment` | `segment()` | `{ start, end }` frames to play |
+| `onFrame` | `play(onFrame)` | Called with the frame number while playing |
+
+`LottieAnimation` also takes:
+
+| Prop | WebCanvas | Description |
+| --- | --- | --- |
+| `segment` | `segment(marker)` | A marker name, besides `{ start, end }` |
+| `slot` | `gen()`, `apply()` | Slot data as an object or a JSON string |
+| `quality` | `quality()` | Rendering quality |
+| `volume` | `volume()` | Audio volume |
+| `resolver` | `resolver()` | `AudioResolver` for Lottie audio |
+
+Use the `ref` for the rest of the WebCanvas API, such as `info()`, `markersCnt()` or `seek()`:
+
+```tsx
+const lottie = useRef<LottieAnimation>(null);
+
+useEffect(() => {
+  console.log(lottie.current?.info());
+}, []);
+```

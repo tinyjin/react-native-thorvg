@@ -5377,6 +5377,7 @@ __metadata:
     "@react-native/eslint-config": "npm:0.88.0"
     "@thorvg/webcanvas": "npm:~1.1.3"
     "@types/react": "npm:^19.2.0"
+    "@types/react-reconciler": "npm:0.31.0"
     del-cli: "npm:^8.0.1"
     eslint: "npm:^9.39.5"
     eslint-config-prettier: "npm:^10.1.8"
@@ -5386,6 +5387,7 @@ __metadata:
     react: "npm:19.3.0"
     react-native: "npm:0.88.0"
     react-native-builder-bob: "npm:^0.44.1"
+    react-reconciler: "npm:0.31.0"
     turbo: "npm:^2.11.10"
     typescript: "npm:^6.0.3"
   peerDependencies:
@@ -5706,6 +5708,15 @@ __metadata:
   version: 1.2.7
   resolution: "@types/range-parser@npm:1.2.7"
   checksum: 10c0/361bb3e964ec5133fa40644a0b942279ed5df1949f21321d77de79f48b728d39253e5ce0408c9c17e4e0fd95ca7899da36841686393b9f7a1e209916e9381a3c
+  languageName: node
+  linkType: hard
+
+"@types/react-reconciler@npm:0.31.0":
+  version: 0.31.0
+  resolution: "@types/react-reconciler@npm:0.31.0"
+  peerDependencies:
+    "@types/react": "*"
+  checksum: 10c0/9d8fd6334760d51e94dbf22b9783199c8937a2b76d1f682ef6f7f46d0ced578ccc8a9e285475931c9d410df1cae4b0fc17c0b3bb55dd00cc4e9a70a5707b3b09
   languageName: node
   linkType: hard
 
@@ -15432,6 +15443,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-reconciler@npm:0.31.0":
+  version: 0.31.0
+  resolution: "react-reconciler@npm:0.31.0"
+  dependencies:
+    scheduler: "npm:^0.25.0"
+  peerDependencies:
+    react: ^19.0.0
+  checksum: 10c0/97920e1866c7206e200c3920c133c2e85f62a3c54fd9bc4b83c10c558d83d98eb378caab4fe37498e0cc1b1b2665d898627f2ae2537b29c8ab295ec8abc0c580
+  languageName: node
+  linkType: hard
+
 "react-refresh@npm:^0.14.0, react-refresh@npm:^0.14.2":
   version: 0.14.2
   resolution: "react-refresh@npm:0.14.2"
@@ -16096,6 +16118,13 @@ __metadata:
   version: 0.28.0
   resolution: "scheduler@npm:0.28.0"
   checksum: 10c0/783c8e5ce89d41273a02ed6dc0e3d24bd60e05c9e8f7e3adfc6c82e7c69935500d90e343f1ee26d592fc7504e8a2532573c6368def3e93bfe812391fa53efaf4
+  languageName: node
+  linkType: hard
+
+"scheduler@npm:^0.25.0":
+  version: 0.25.0
+  resolution: "scheduler@npm:0.25.0"
+  checksum: 10c0/a4bb1da406b613ce72c1299db43759526058fdcc413999c3c3e0db8956df7633acf395cb20eb2303b6a65d658d66b6585d344460abaee8080b4aa931f10eaafe
   languageName: node
   linkType: hard
 

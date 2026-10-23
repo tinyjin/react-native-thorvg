@@ -4,14 +4,17 @@ import {
   type CanvasTarget as WebCanvasTarget,
 } from '@thorvg/webcanvas';
 import {
+  bindCanvas,
   isCanvasRef,
   resolveTarget,
   type CanvasRef,
   type CanvasTarget,
-} from '../components/CanvasTarget';
+  unbindCanvas,
+} from '../canvas/CanvasTarget';
 
 const elements = new WeakMap<WebCanvas, unknown>();
 const subscriptions = new WeakMap<WebCanvas, () => void>();
+const targets = new WeakMap<WebCanvas, CanvasTarget>();
 
 function fit(element: unknown): void {
   const style = (element as { style?: Record<string, string> } | null)?.style;
@@ -42,6 +45,8 @@ export class Canvas extends WebCanvas {
     if (!surface) return;
 
     elements.set(this, surface.element);
+    targets.set(this, surface);
+    bindCanvas(surface, this);
     fit(surface.element);
     if (options.width === undefined || options.height === undefined) {
       subscriptions.set(
@@ -63,6 +68,9 @@ export class Canvas extends WebCanvas {
   override destroy(): void {
     subscriptions.get(this)?.();
     subscriptions.delete(this);
+    const target = targets.get(this);
+    if (target) unbindCanvas(target, this);
+    targets.delete(this);
     super.destroy();
   }
 }

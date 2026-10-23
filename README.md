@@ -14,6 +14,24 @@ npm install @thorvg/react-native-thorvg
 
 ## Usage
 
+### Declarative API (Components)
+
+Import the components and render them inside `Canvas`.
+
+```tsx
+import { Canvas, Rect } from '@thorvg/react-native-thorvg';
+
+const Example = () => (
+  <Canvas width={200} height={160}>
+    <Rect x={20} y={20} width={160} height={120} rx={16} ry={16} fill="#2563eb" />
+  </Canvas>
+);
+```
+
+### WebCanvas API
+
+Use the [`@thorvg/webcanvas`](https://www.npmjs.com/package/@thorvg/webcanvas) API directly with `useThorVG`.
+
 ```tsx
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG } from '@thorvg/react-native-thorvg';
@@ -36,7 +54,6 @@ const Example = () => {
   return <Canvas ref={view} style={{ width: 200, height: 160 }} />;
 }
 ```
-
 
 ## Requirements
 

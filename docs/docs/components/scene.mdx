@@ -1,0 +1,63 @@
+---
+title: Scene
+sidebar_position: 4
+---
+
+`Scene` groups paints. Its [paint properties](./paint) apply to all of its children, and `effects` apply scene effects to them. Its `ref` receives the WebCanvas `Scene`.
+
+![Scene](/img/components/scene.png)
+
+```tsx
+import {
+  BlendMethod,
+  Canvas,
+  Circle,
+  Rect,
+  Scene,
+} from '@thorvg/react-native-thorvg';
+
+<Canvas width={600} height={600}>
+  <Scene
+    translate={{ x: 300, y: 300 }}
+    rotate={15}
+    effects={[
+      {
+        type: 'dropShadow',
+        color: [0, 0, 0, 120],
+        angle: 120,
+        distance: 20,
+        sigma: 8,
+      },
+    ]}
+  >
+    <Rect
+      x={-150}
+      y={-150}
+      width={300}
+      height={300}
+      rx={40}
+      ry={40}
+      fill="#22c55e"
+    />
+    <Scene opacity={200} blend={BlendMethod.Multiply}>
+      <Circle cx={-60} cy={-60} rx={110} fill="#facc15" />
+      <Circle cx={80} cy={80} rx={90} fill="#06b6d4" />
+    </Scene>
+  </Scene>
+</Canvas>
+```
+
+## Effects
+
+`effects` is a list. Each entry calls the WebCanvas `Scene` method of the same name, in order:
+
+| `type` | WebCanvas | Fields |
+| --- | --- | --- |
+| `'gaussianBlur'` | `gaussianBlur()` | `sigma`, `direction?` (0 both, 1 horizontal, 2 vertical), `border?`, `quality?` (0 to 100) |
+| `'motionBlur'` | `motionBlur()` | `distance`, `angle?`, `quality?` |
+| `'dropShadow'` | `dropShadow()` | `color`, `angle`, `distance`, `sigma`, `quality?` |
+| `'fill'` | `fillEffect()` | `color` |
+| `'tint'` | `tint()` | `black`, `white`, `intensity` |
+| `'tritone'` | `tritone()` | `shadow`, `midtone`, `highlight`, `blend` |
+
+Colors take a hex string or an `[r, g, b, a]` array. Changing `effects` calls `resetEffects()` and applies the list again.

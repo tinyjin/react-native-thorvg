@@ -1,0 +1,73 @@
+---
+title: Text
+sidebar_position: 8
+---
+
+`Text` draws text with a loaded font. `Font` loads a font for it. The `ref` of `Text` receives the WebCanvas `Text`.
+
+![Text](/img/components/text.png)
+
+```tsx
+import {
+  Canvas,
+  Font,
+  LinearGradient,
+  Text,
+  TextWrapMode,
+} from '@thorvg/react-native-thorvg';
+
+<Canvas width={600} height={600}>
+  <Font name="PublicSans" data={fontData} type="ttf" />
+  <Text
+    text="ThorVG Text"
+    font="PublicSans"
+    fontSize={64}
+    translate={{ x: 40, y: 60 }}
+  >
+    <LinearGradient
+      x1={40}
+      y1={0}
+      x2={560}
+      y2={0}
+      stops={[
+        [0, [37, 99, 235, 255]],
+        [1, [236, 72, 153, 255]],
+      ]}
+    />
+  </Text>
+  <Text
+    text="Text wraps inside the layout box when it reaches the right edge of the area."
+    font="PublicSans"
+    fontSize={28}
+    fill="#374151"
+    layout={{ width: 520, height: 200 }}
+    wrap={TextWrapMode.Word}
+    translate={{ x: 40, y: 300 }}
+  />
+</Canvas>
+```
+
+## Text
+
+| Prop | WebCanvas | Description |
+| --- | --- | --- |
+| `text` | `text()` | Content |
+| `font` | `font()` | Font name. `'default'` is a small built-in font on Android and iOS |
+| `fontSize` | `fontSize()` | Size |
+| `fill` | `fill()` | [Color](./overview#colors). A gradient child replaces it |
+| `align` | `align()` | `{ x, y }` alignment inside the layout, from 0 to 1 |
+| `layout` | `layout()` | `{ width, height? }` box |
+| `wrap` | `wrap()` | `TextWrapMode` |
+| `spacing` | `spacing()` | `{ letter, line }` |
+| `italic` | `italic()` | `true` or a shear value |
+| `outline` | `outline()` | `{ width, color }` |
+
+## Font
+
+| Prop | WebCanvas | Description |
+| --- | --- | --- |
+| `name` | `Font.load(name)` | Name to use in `font` |
+| `data` | `Font.load(name, data)` | Font file data |
+| `type` | `Font.load(name, data, { type })` | `'ttf'` or `'otf'` |
+
+`Font` draws nothing. Put it before the `Text` that uses it. The font is unloaded when `Font` unmounts.

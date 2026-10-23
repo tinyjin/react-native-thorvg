@@ -5,11 +5,14 @@ import { Scene } from './Scene';
 import { checkResult, handleError } from '../errors';
 import { EngineOption } from '../generated/constants';
 import { getJSI, type CanvasHandle } from '../jsi';
+import type { Canvas as WebCanvas } from '@thorvg/webcanvas';
 import {
+  bindCanvas,
   resolveTarget,
+  unbindCanvas,
   type CanvasRef,
   type CanvasTarget,
-} from '../../components/CanvasTarget';
+} from '../../canvas/CanvasTarget';
 
 type Renderer = NonNullable<InitOptions['renderer']>;
 
@@ -34,6 +37,7 @@ export class Canvas {
   #currentDPR: number = 1;
   #needsUpdate: boolean = false;
   #unsubscribe: (() => void) | null = null;
+  #target: CanvasTarget | null = null;
 
   constructor(target: CanvasTarget | CanvasRef, options: CanvasOptions = {}) {
     const surface = resolveTarget(target);
@@ -81,6 +85,9 @@ export class Canvas {
       'add main scene'
     );
     jsi.tvg_paint_ref(this.#mainScene.handle);
+
+    this.#target = surface;
+    bindCanvas(surface, this as unknown as WebCanvas);
 
     if (width === undefined || height === undefined) {
       this.#unsubscribe = surface.subscribe((w, h) => {
@@ -186,6 +193,10 @@ export class Canvas {
   public destroy(): void {
     this.#unsubscribe?.();
     this.#unsubscribe = null;
+    if (this.#target) {
+      unbindCanvas(this.#target, this as unknown as WebCanvas);
+      this.#target = null;
+    }
     if (this.#mainScene) {
       this.#mainScene.clear();
       this.#mainScene.dispose();

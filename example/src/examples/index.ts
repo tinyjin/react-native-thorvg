@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react';
+import type { ImageSourcePropType } from 'react-native';
 import ConicGradient from './conic-gradient';
 import CustomTransform from './custom-transform';
 import DirectUpdate from './direct-update';
@@ -54,15 +55,22 @@ import PictureSvg from './picture-svg';
 import PictureTransform from './picture-transform';
 import PictureWebp from './picture-webp';
 import Svg from './svg';
+import ComponentsShapes from './components-shapes';
+import ComponentsScene from './components-scene';
+import ComponentsMasking from './components-masking';
+import ComponentsPicture from './components-picture';
+import ComponentsText from './components-text';
+import ComponentsLottie from './components-lottie';
 
-export type ExampleCategory = 'basic' | 'advanced' | 'text' | 'media';
+export type ExampleCategory =
+  'basic' | 'advanced' | 'text' | 'media' | 'components';
 
 export interface Example {
   id: string;
   title: string;
   description: string;
   category: ExampleCategory;
-  thumbnail: string;
+  thumbnail: string | ImageSourcePropType;
   Component: ComponentType;
 }
 
@@ -512,5 +520,53 @@ export const examples: Example[] = [
     category: 'media',
     thumbnail: '/assets/svg-thumbnail.png',
     Component: Svg,
+  },
+  {
+    id: 'components-shapes',
+    title: 'Shapes',
+    description: 'Draw shapes, gradients, strokes and paths with components',
+    category: 'components',
+    thumbnail: require('../../assets/thumbnails/components-shapes.png'),
+    Component: ComponentsShapes,
+  },
+  {
+    id: 'components-scene',
+    title: 'Scene',
+    description: 'Animate a scene with state, effects and blending',
+    category: 'components',
+    thumbnail: require('../../assets/thumbnails/components-scene.png'),
+    Component: ComponentsScene,
+  },
+  {
+    id: 'components-masking',
+    title: 'Masking',
+    description: 'Clip and mask paints with components',
+    category: 'components',
+    thumbnail: require('../../assets/thumbnails/components-masking.png'),
+    Component: ComponentsMasking,
+  },
+  {
+    id: 'components-picture',
+    title: 'Picture',
+    description: 'Load SVG and PNG pictures with components',
+    category: 'components',
+    thumbnail: require('../../assets/thumbnails/components-picture.png'),
+    Component: ComponentsPicture,
+  },
+  {
+    id: 'components-text',
+    title: 'Text',
+    description: 'Render text with a loaded font, gradients and layout',
+    category: 'components',
+    thumbnail: require('../../assets/thumbnails/components-text.png'),
+    Component: ComponentsText,
+  },
+  {
+    id: 'components-lottie',
+    title: 'Lottie',
+    description: 'Play a Lottie animation with a component',
+    category: 'components',
+    thumbnail: require('../../assets/thumbnails/components-lottie.png'),
+    Component: ComponentsLottie,
   },
 ];

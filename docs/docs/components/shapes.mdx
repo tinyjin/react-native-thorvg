@@ -1,0 +1,98 @@
+---
+title: Shapes
+sidebar_position: 2
+---
+
+`Rect`, `Circle` and `Path` each draw one WebCanvas `Shape`. Their `ref` receives the `Shape`.
+
+![Shapes](/img/components/shapes.png)
+
+```tsx
+import {
+  Canvas,
+  Circle,
+  Path,
+  PathCommand,
+  Rect,
+} from '@thorvg/react-native-thorvg';
+
+<Canvas width={600} height={600}>
+  <Rect
+    x={40}
+    y={40}
+    width={220}
+    height={220}
+    rx={32}
+    ry={32}
+    fill="#2563eb"
+    stroke={{ width: 8, color: '#93c5fd' }}
+  />
+  <Circle cx={450} cy={150} rx={110} fill="#f43f5e" />
+  <Path
+    commands={[
+      PathCommand.MoveTo,
+      PathCommand.LineTo,
+      PathCommand.LineTo,
+      PathCommand.Close,
+    ]}
+    points={[
+      [300, 340],
+      [520, 540],
+      [80, 540],
+    ]}
+    fill="#facc15"
+  />
+</Canvas>
+```
+
+## Rect
+
+Calls `appendRect()`.
+
+| Prop | Description |
+| --- | --- |
+| `x`, `y`, `width`, `height` | Rectangle |
+| `rx`, `ry` | Corner radius |
+| `clockwise` | Path direction |
+
+## Circle
+
+Calls `appendCircle()`.
+
+| Prop | Description |
+| --- | --- |
+| `cx`, `cy` | Center |
+| `rx`, `ry` | Radius. `ry` defaults to `rx` |
+| `clockwise` | Path direction |
+
+## Path
+
+Calls `appendPath()`. A path can hold several contours, each starting with `MoveTo`, so shapes with holes are one `Path` with `fillRule={FillRule.EvenOdd}`.
+
+| Prop | Description |
+| --- | --- |
+| `commands` | `PathCommand` values |
+| `points` | One `[x, y]` point per `MoveTo` and `LineTo`, three per `CubicTo` |
+
+## Shape properties
+
+| Prop | WebCanvas | Description |
+| --- | --- | --- |
+| `fill` | `fill()` | Fill [color](./overview#colors). A gradient child replaces it |
+| `fillRule` | `fillRule()` | `FillRule.Winding` (default) or `FillRule.EvenOdd` |
+| `stroke` | `stroke()` | Stroke width, or the options below |
+| `trimPath` | `trimPath()` | `{ begin, end, simultaneous? }` from 0 to 1 |
+| `order` | `order()` | `true` draws the stroke under the fill |
+
+`stroke` options:
+
+| Option | Description |
+| --- | --- |
+| `width` | Stroke width. Default `1` |
+| `color` | Stroke [color](./overview#colors). A `stroke` gradient child replaces it |
+| `cap` | `StrokeCap` |
+| `join` | `StrokeJoin` |
+| `miterLimit` | Miter limit |
+| `dash`, `dashOffset` | Dash pattern and offset |
+
+Shapes also take the [paint properties](./paint), [gradients](./gradients) and [clip and mask](./masking) children.

@@ -1,5 +1,24 @@
-export { Canvas } from './components/Canvas';
-export type { CanvasTarget } from './components/CanvasTarget';
+export { Canvas } from './canvas/Canvas';
+export {
+  Animation,
+  Circle,
+  Clip,
+  ConicGradient,
+  Font,
+  LinearGradient,
+  LottieAnimation,
+  Mask,
+  Path,
+  Picture,
+  RadialGradient,
+  Rect,
+  Scene,
+  Text,
+} from './components';
+export type * from './components/props';
+export type { Color } from './color';
+export * from './constants';
+export type { CanvasTarget } from './canvas/CanvasTarget';
 export { init } from './init';
 export { useThorVG } from './useThorVG';
 export { ThorVGError, ThorVGResultCode } from './platform';
@@ -13,7 +32,6 @@ export type {
 
 export type {
   Accessor,
-  Animation,
   AnimationInfo,
   AnimationSegment,
   AssetResolver,
@@ -22,31 +40,23 @@ export type {
   Bounds,
   CanvasOptions,
   ColorStop,
-  ConicGradient,
   ErrorContext,
   ErrorHandler,
-  Font,
   FontProvider,
   FontProviderResult,
   FontType,
-  LinearGradient,
   LoadDataOptions,
   LoadFontOptions,
-  LottieAnimation,
   LottieMarker,
   LottieSlotData,
   Matrix,
   MimeType,
   Paint,
-  Picture,
   PictureSize,
-  RadialGradient,
   RectOptions,
   RendererType,
-  Scene,
   Shape,
   StrokeOptions,
-  Text,
   TextLayout,
   TextOutline,
 } from '@thorvg/webcanvas';
