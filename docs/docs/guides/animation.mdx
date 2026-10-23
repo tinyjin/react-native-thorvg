@@ -1,0 +1,78 @@
+---
+title: Animation
+sidebar_position: 2
+---
+
+A canvas keeps its paints. To change the picture, update the paints and draw again:
+
+```ts
+shape.translate(x, y);
+canvas.update().render();
+```
+
+`render()` updates the canvas first when paints were added or removed. Call `update()` yourself after changing existing paints.
+
+## Frame loop
+
+Use `requestAnimationFrame` and stop it when the component unmounts:
+
+```tsx
+useEffect(() => {
+  const canvas = canvasRef.current;
+  if (!TVG || !canvas) return;
+  let rafId = 0;
+
+  const shape = new TVG.Shape();
+  shape.appendRect(-50, -50, 100, 100).fill(0, 255, 255);
+  shape.translate(300, 300);
+  canvas.add(shape);
+
+  const animate = (time: number) => {
+    shape.rotate((time / 10) % 360);
+    canvas.update().render();
+    rafId = requestAnimationFrame(animate);
+  };
+  rafId = requestAnimationFrame(animate);
+
+  return () => cancelAnimationFrame(rafId);
+}, [TVG]);
+```
+
+## Loading assets
+
+`Picture.load()`, `Animation.load()` and `Font.load()` take a `string` or a `Uint8Array`. React Native's `fetch` has no `Response.bytes()`, so read binary data through `arrayBuffer()`:
+
+```ts
+const res = await fetch('https://example.com/image.png');
+const data = new Uint8Array(await res.arrayBuffer());
+
+const picture = new TVG.Picture();
+picture.load(data, { type: 'png' });
+```
+
+When the effect awaits a download, check that the component is still mounted before drawing:
+
+```tsx
+useEffect(() => {
+  const canvas = canvasRef.current;
+  if (!TVG || !canvas) return;
+  let active = true;
+
+  (async () => {
+    const svg = await (await fetch(url)).text();
+    if (!active) return;
+
+    const picture = new TVG.Picture();
+    picture.load(svg, { type: 'svg' });
+    canvas.add(picture).render();
+  })();
+
+  return () => {
+    active = false;
+  };
+}, [TVG]);
+```
+
+## Releasing objects
+
+Objects are released when they are garbage collected. Call `dispose()` to release one right away, for example an animation when the component unmounts.

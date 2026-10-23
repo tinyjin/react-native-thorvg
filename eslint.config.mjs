@@ -41,6 +41,7 @@ export default defineConfig([
       'example/dist/',
       'example/ios/',
       'example/android/',
+      'docs/',
     ],
   },
 ]);

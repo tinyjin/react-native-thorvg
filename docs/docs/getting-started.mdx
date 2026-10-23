@@ -1,0 +1,62 @@
+---
+title: Getting started
+slug: /getting-started
+sidebar_position: 1
+---
+
+`@thorvg/react-native-thorvg` brings [ThorVG](https://github.com/thorvg/thorvg) vector graphics and Lottie to React Native on Android, iOS and web.
+
+The drawing API is the [`@thorvg/webcanvas`](https://www.npmjs.com/package/@thorvg/webcanvas) API. On web the package runs `@thorvg/webcanvas` itself. On Android and iOS the same classes run on the native ThorVG engine through JSI, so the same code draws the same result on every platform.
+
+## Requirements
+
+- React Native with the New Architecture
+- Android API 24+ and iOS 15.1+
+- Expo apps need a development build (`npx expo prebuild` or `npx expo run:android|ios`). Expo Go does not include the native module.
+
+## Installation
+
+```sh
+npm install @thorvg/react-native-thorvg
+cd ios && pod install
+```
+
+With Expo:
+
+```sh
+npx expo install @thorvg/react-native-thorvg
+npx expo prebuild
+```
+
+## Your first canvas
+
+```tsx
+import { useEffect, useRef } from 'react';
+import { useThorVG, type Canvas } from '@thorvg/react-native-thorvg';
+
+const Example = () => {
+  const TVG = useThorVG({ renderer: 'sw' });
+  const canvas = useRef<Canvas>(null);
+
+  useEffect(() => {
+    if (!TVG || !canvas.current) return;
+
+    const shape = new TVG.Shape();
+    shape.appendRect(20, 20, 160, 120, { rx: 16, ry: 16 }).fill(37, 99, 235, 255);
+    canvas.current.add(shape).render();
+  }, [TVG]);
+
+  if (!TVG) return null;
+  return <TVG.Canvas ref={canvas} style={{ width: 200, height: 160 }} />;
+};
+
+export default Example;
+```
+
+`useThorVG()` returns `null` until ThorVG is ready and then the ThorVG namespace (`TVG`). `TVG.Canvas` is a component, and its `ref` receives a `Canvas` instance with the WebCanvas methods such as `add`, `update` and `render`.
+
+## Next steps
+
+- [Canvas](./guides/canvas) explains sizing, lifecycle and touch input.
+- [Animation](./guides/animation) shows how to update a scene every frame.
+- [Examples](./examples) runs 55 examples in the browser with their full source.

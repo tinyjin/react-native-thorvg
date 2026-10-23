@@ -1,0 +1,76 @@
+---
+title: Canvas
+sidebar_position: 1
+---
+
+`TVG.Canvas` is a React component. It renders a native view on Android and iOS and a `<canvas>` element on web, and creates a ThorVG canvas for it.
+
+```tsx
+const canvas = useRef<Canvas>(null);
+
+return <TVG.Canvas ref={canvas} width={600} height={600} style={{ width: '100%', aspectRatio: 1 }} />;
+```
+
+The `ref` receives a [`Canvas`](https://thorvg.github.io/thorvg.web/classes/Canvas.html) instance. It has the same methods as the WebCanvas `Canvas`: `add`, `remove`, `clear`, `update`, `render`, `resize`, `viewport` and `destroy`, plus the `renderer` and `dpr` getters.
+
+## Drawing size and view size
+
+Two sizes are involved, and they are independent.
+
+| | Set by | Meaning |
+| --- | --- | --- |
+| Drawing size | `width` and `height` props | The coordinate space you draw in |
+| View size | `style` | How large the canvas appears on screen |
+
+The drawing is scaled to fill the view. Drawing at `600 × 600` and showing it at the screen width keeps the same coordinates on every device:
+
+```tsx
+<TVG.Canvas ref={canvas} width={600} height={600} style={{ width: '100%', aspectRatio: 1 }} />
+```
+
+Without `width` and `height`, the drawing size follows the layout size of the view. The canvas is resized and redrawn when the layout changes.
+
+## Device pixel ratio
+
+With `enableDevicePixelRatio` (the default), the canvas renders at a higher resolution on high density screens. The ratio is `1 + (devicePixelRatio - 1) × 0.75`, the same as WebCanvas on web. Set `enableDevicePixelRatio={false}` to render at the drawing size.
+
+## Lifecycle
+
+- The ThorVG canvas is created when the component mounts. The `ref` is set before the effects of the parent component run, so a parent `useEffect` can draw right away.
+- The canvas is destroyed when the component unmounts, and the `ref` is set back to `null`.
+- Changing `enableDevicePixelRatio` or `engineOption` creates a new canvas.
+
+## Touch input
+
+`TVG.Canvas` accepts all `View` props, including the responder props. Convert the touch position to drawing coordinates with the layout size:
+
+```tsx
+const layout = useRef({ width: 600, height: 600 });
+
+const onTouch = (e: GestureResponderEvent) => {
+  const x = e.nativeEvent.locationX * (600 / layout.current.width);
+  const y = e.nativeEvent.locationY * (600 / layout.current.height);
+  // ...
+};
+
+return (
+  <TVG.Canvas
+    ref={canvas}
+    width={600}
+    height={600}
+    style={{ width: '100%', aspectRatio: 1 }}
+    onLayout={(e) => {
+      layout.current = e.nativeEvent.layout;
+    }}
+    onStartShouldSetResponder={() => true}
+    onResponderGrant={onTouch}
+    onResponderMove={onTouch}
+  />
+);
+```
+
+Inside a `ScrollView`, also pass `onResponderTerminationRequest={() => false}` so that dragging on the canvas does not scroll.
+
+## Android backing view
+
+On Android the canvas draws into a `TextureView` by default. It blends with the views behind it and supports transforms and rounded corners. Set `androidBackingView="SurfaceView"` to draw into a `SurfaceView`, which composites on its own layer and does not blend with views behind it.

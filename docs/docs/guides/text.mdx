@@ -1,0 +1,41 @@
+---
+title: Text and fonts
+sidebar_position: 4
+---
+
+`TVG.Text` draws text with a loaded font. A small built-in font named `default` is always available:
+
+```ts
+const text = new TVG.Text();
+text.font('default').fontSize(24).text('Hello ThorVG').fill(255, 255, 255);
+text.translate(20, 40);
+canvas.add(text);
+```
+
+## Loading fonts
+
+Load TrueType or OpenType data with `Font.load(name, data)` and refer to the font by its name:
+
+```ts
+const res = await fetch('https://example.com/fonts/Inter.ttf');
+TVG.Font.load('Inter', new Uint8Array(await res.arrayBuffer()), { type: 'ttf' });
+
+text.font('Inter');
+```
+
+`Font.unload(name)` removes a loaded font.
+
+## Font providers
+
+`Font.load(name)` without data asks a font provider for the font. On web the default provider downloads fonts from Fontsource. On Android and iOS there is no default provider, so set one with `Font.provider()`:
+
+```ts
+TVG.Font.provider({
+  async fetch(name) {
+    const res = await fetch(`https://example.com/fonts/${name}.ttf`);
+    return { data: new Uint8Array(await res.arrayBuffer()), type: 'ttf' };
+  },
+});
+
+await TVG.Font.load('Inter');
+```

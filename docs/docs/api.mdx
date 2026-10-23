@@ -1,0 +1,90 @@
+---
+title: API
+sidebar_position: 3
+---
+
+import WebCanvasVersion from '@site/src/components/WebCanvasVersion';
+
+The classes, enums and their methods are the [`@thorvg/webcanvas` API](https://thorvg.github.io/thorvg.web/). This page covers React Native specific APIs.
+
+:::note
+This package follows `@thorvg/webcanvas` <WebCanvasVersion />. The WebCanvas reference describes the latest release, which can include APIs that <WebCanvasVersion /> does not have yet.
+:::
+
+## `useThorVG(options?)`
+
+```ts
+function useThorVG(options?: InitOptions): ThorVG | null;
+```
+
+Returns `null` until ThorVG is initialized and the ThorVG namespace afterwards. Initialization errors are thrown during render, so an error boundary can catch them.
+
+## `init(options?)`
+
+```ts
+function init(options?: InitOptions): Promise<ThorVG>;
+```
+
+Initializes ThorVG outside of React. `init()` and `useThorVG()` share one initialization. Only the options of the first call apply, as in WebCanvas.
+
+### `InitOptions`
+
+| Option | Platforms | Description |
+| --- | --- | --- |
+| `renderer` | All | `'sw'`, `'gl'` or `'wg'`. Android and iOS currently render with `'sw'` |
+| `onError` | All | Receives errors instead of throwing them. See [Errors](#errors) |
+| `locateFile` | Web | Resolves the URL of `thorvg.wasm`. Defaults to unpkg |
+| `threads` | Web | Worker thread count for the threaded WebCanvas build |
+
+## `ThorVG`
+
+The namespace returned by `init()` and `useThorVG()`. It is the WebCanvas namespace with `Canvas` replaced by a component and without `Video`.
+
+| Member | Reference |
+| --- | --- |
+| `Shape`, `Scene`, `Picture`, `Text` | [Shape](https://thorvg.github.io/thorvg.web/classes/Shape.html), [Scene](https://thorvg.github.io/thorvg.web/classes/Scene.html), [Picture](https://thorvg.github.io/thorvg.web/classes/Picture.html), [Text](https://thorvg.github.io/thorvg.web/classes/Text.html) |
+| `Animation`, `LottieAnimation` | [Animation](https://thorvg.github.io/thorvg.web/classes/Animation.html), [LottieAnimation](https://thorvg.github.io/thorvg.web/classes/LottieAnimation.html) |
+| `LinearGradient`, `RadialGradient`, `ConicGradient` | [LinearGradient](https://thorvg.github.io/thorvg.web/classes/LinearGradient.html), [RadialGradient](https://thorvg.github.io/thorvg.web/classes/RadialGradient.html), [ConicGradient](https://thorvg.github.io/thorvg.web/classes/ConicGradient.html) |
+| `Font`, `Accessor`, `Paint` | [Font](https://thorvg.github.io/thorvg.web/classes/Font.html), [Accessor](https://thorvg.github.io/thorvg.web/classes/Accessor.html), [Paint](https://thorvg.github.io/thorvg.web/classes/Paint.html) |
+| `BlendMethod`, `MaskMethod`, `StrokeCap`, `StrokeJoin`, `FillRule`, `PathCommand`, `GradientSpread`, `SceneEffect`, `TextWrapMode`, `ColorSpace`, `FilterMethod`, `EngineOption` | [Enums](https://thorvg.github.io/thorvg.web/) |
+| `Canvas` | [`TVG.Canvas`](#tvgcanvas) |
+| `version` | ThorVG engine version |
+| `term()` | Resets the initialization |
+
+## `TVG.Canvas`
+
+```tsx
+<TVG.Canvas ref={canvas} width={600} height={600} style={{ width: '100%', aspectRatio: 1 }} />
+```
+
+| Prop | Description |
+| --- | --- |
+| `ref` | Receives the [`Canvas`](https://thorvg.github.io/thorvg.web/classes/Canvas.html) instance |
+| `width`, `height` | Drawing size. Defaults to the layout size of the view |
+| `enableDevicePixelRatio` | Renders at the device pixel ratio. Default `true` |
+| `engineOption` | `TVG.EngineOption` value for the engine |
+| `androidBackingView` | `'TextureView'` (default) or `'SurfaceView'`. Android only |
+
+All other `View` props, such as `style`, `onLayout` and the responder props, are passed to the view. See [Canvas](./guides/canvas) for sizing and lifecycle.
+
+## Errors
+
+ThorVG calls that fail throw a [`ThorVGError`](https://thorvg.github.io/thorvg.web/classes/ThorVGError.html) with a [`ThorVGResultCode`](https://thorvg.github.io/thorvg.web/enums/ThorVGResultCode.html). With `onError`, the error is passed to the handler instead:
+
+```ts
+useThorVG({
+  onError: (error, context) => console.warn(context.operation, error.message),
+});
+```
+
+`ThorVGError` and `ThorVGResultCode` are exported from the package.
+
+## Types
+
+The package re-exports the WebCanvas types, so you can import them from `@thorvg/react-native-thorvg`:
+
+```ts
+import type { Canvas, Shape, Picture, LottieAnimation, ColorStop } from '@thorvg/react-native-thorvg';
+```
+
+It also exports `ThorVG`, `InitOptions`, `CanvasProps` and `AndroidBackingView`.

@@ -43,7 +43,8 @@
     "clean": "del-cli lib android/build android/.cxx example/android/build example/android/app/build example/ios/build",
     "prepare": "node scripts/generate-constants.mjs && bob build",
     "typecheck": "tsc && tsc -p example",
-    "lint": "eslint \"**/*.{js,ts,tsx}\""
+    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "docs": "yarn workspace @thorvg/react-native-thorvg-docs start"
   },
   "keywords": [
     "react-native",
@@ -96,7 +97,8 @@
     "react-native": "*"
   },
   "workspaces": [
-    "example"
+    "example",
+    "docs"
   ],
   "devEngines": {
     "packageManager": {

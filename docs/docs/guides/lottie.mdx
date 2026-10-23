@@ -1,0 +1,49 @@
+---
+title: Lottie
+sidebar_position: 3
+---
+
+ThorVG includes a Lottie runtime, so Lottie animations play on a canvas without another package.
+
+```tsx
+useEffect(() => {
+  const canvas = canvasRef.current;
+  if (!TVG || !canvas) return;
+
+  const animation = new TVG.LottieAnimation();
+  animation.load(JSON.stringify(lottieJson));
+
+  const picture = animation.picture!;
+  picture.size(600, 600);
+  canvas.add(picture);
+
+  animation.play(() => canvas.update().render());
+
+  return () => animation.dispose();
+}, [TVG]);
+```
+
+`load()` takes the Lottie JSON as a string or as UTF-8 bytes. After loading, `info()` returns the total frames, the duration and the frame rate.
+
+## Controlling playback
+
+| Method | Description |
+| --- | --- |
+| `play(onFrame?)` | Starts a frame loop. `onFrame` runs after each frame is set |
+| `pause()`, `stop()` | Stops the loop. `stop()` also returns to frame 0 |
+| `frame(n)` | Sets the current frame for your own loop |
+| `setLoop(loop)` | Loops at the end (default `true`) |
+| `segment(marker)`, `segment(begin, end)` | Plays a marker or a frame range |
+
+## Slots and markers
+
+`gen()` creates a slot from slot JSON, `apply()` applies it and `del()` removes it. `markersCnt()` and `marker(index)` read the markers of the animation. The Lottie Slot and Lottie Interaction [examples](../examples) show both in use.
+
+```ts
+const id = animation.gen(slotJson);
+animation.apply(id);
+```
+
+## Audio
+
+Lottie audio layers are reported to `resolver()` with the source, offset, volume and whether the layer is active. On Android and iOS there is no built-in audio playback, so play the audio with your own audio library from the resolver.

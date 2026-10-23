@@ -1,0 +1,39 @@
+---
+title: Platforms
+sidebar_position: 4
+---
+
+## Android
+
+Canvases render with the software engine into a `TextureView` by default. `androidBackingView="SurfaceView"` draws into a `SurfaceView` instead. GPU rendering (OpenGL ES) is planned.
+
+The `renderer` option is ignored on Android.
+
+## iOS
+
+Run `pod install` in your `ios` directory after installing the package. Canvases render with the software engine and are presented through Metal. GPU rendering (WebGPU) is planned.
+
+The `renderer` option is ignored on iOS.
+
+## Web
+
+On web the package runs `@thorvg/webcanvas`, which loads `thorvg.wasm` from unpkg by default. To serve it yourself, copy it into your static folder:
+
+```sh
+npx setup-thorvg-web public
+```
+
+and pass `locateFile`:
+
+```ts
+useThorVG({ locateFile: (path) => '/' + path.split('/').pop() });
+```
+
+## Differences from WebCanvas
+
+| Feature | Android and iOS | Web |
+| --- | --- | --- |
+| `TVG.Video` | Not available | Not exposed by this package |
+| `Font.load(name)` with the default provider | Needs `Font.provider()` | Fontsource |
+| Lottie audio playback | Events through `resolver()` only | Built in |
+| `locateFile`, `threads` | Ignored | Supported |
