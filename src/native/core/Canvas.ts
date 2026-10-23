@@ -17,8 +17,9 @@ import {
 
 type Renderer = NonNullable<InitOptions['renderer']>;
 
-const platformRenderer: Renderer = Platform.OS === 'android' ? 'gl' : 'wg';
+const platformRenderer: Renderer = Platform.OS === 'android' ? 'gl' : 'sw';
 let preferredRenderer: Renderer = platformRenderer;
+let warnedFallback = false;
 
 export function setRenderer(renderer: Renderer | undefined): void {
   preferredRenderer = renderer ?? platformRenderer;
@@ -73,6 +74,15 @@ export class Canvas {
     }
     this.#handle = handle;
     this.#renderer = jsi.canvas_renderer(handle) as Renderer;
+    if (__DEV__ && !warnedFallback && this.#renderer !== preferredRenderer) {
+      warnedFallback = true;
+      console.warn(
+        `ThorVG: the '${preferredRenderer}' renderer is not available, falling back to '${this.#renderer}'.` +
+          (Platform.OS === 'ios' && preferredRenderer === 'wg'
+            ? ' Install @thorvg/react-native-thorvg-webgpu and run `pod install`.'
+            : '')
+      );
+    }
 
     this.#currentDPR = enableDevicePixelRatio ? devicePixelRatio() : 1;
     this.#applySize();

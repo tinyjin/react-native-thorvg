@@ -13,7 +13,33 @@ Android supports `'gl'` (OpenGL ES, the default) and `'sw'`. Other renderers fal
 
 Run `pod install` in your `ios` directory after installing the package.
 
-iOS supports `'wg'` (WebGPU on Metal, the default) and `'sw'`. Other renderers fall back to `'sw'`.
+iOS supports `'sw'` (the default) and `'wg'` (WebGPU on Metal). Other renderers fall back to `'sw'`.
+
+### Enabling WebGPU
+
+`'wg'` is not included by default. It links `wgpu-native`, which adds about 5.5 MB to the app binary. To enable it, install the WebGPU package and run `pod install` again:
+
+```sh
+npm install @thorvg/react-native-thorvg-webgpu
+cd ios && pod install
+```
+
+With Expo:
+
+```sh
+npx expo install @thorvg/react-native-thorvg-webgpu
+npx expo prebuild --platform ios
+```
+
+Then select the renderer:
+
+```ts
+useThorVG({ renderer: 'wg' });
+```
+
+The package adds the WebGPU runtime (`wgpu-native`) to the native build. It ships the runtime for every platform that supports `'wg'`, and only the one for the platform you build is linked into the app.
+
+Without the package, `renderer: 'wg'` falls back to `'sw'`, and a warning is logged in development. To build without WebGPU while the package is installed, run `pod install` with `THORVG_WEBGPU=0`.
 
 ## Web
 

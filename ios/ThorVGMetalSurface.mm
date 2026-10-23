@@ -1,7 +1,9 @@
 #import "ThorVGMetalSurface.h"
 
 #import <Metal/Metal.h>
+#if THORVG_RN_WEBGPU
 #import <webgpu/webgpu.h>
+#endif
 
 #include <algorithm>
 #include <array>
@@ -13,6 +15,7 @@ namespace {
 
 constexpr size_t kFramesInFlight = 3;
 
+#if THORVG_RN_WEBGPU
 class WgGpu final : public Gpu {
  public:
   static WgGpu *shared()
@@ -80,6 +83,7 @@ class WgGpu final : public Gpu {
   WGPUAdapter adapter_ = nullptr;
   WGPUDevice device_ = nullptr;
 };
+#endif
 
 class MetalSurface final : public Surface {
  public:
@@ -88,6 +92,7 @@ class MetalSurface final : public Surface {
         queue_([layer.device newCommandQueue]),
         inflight_(dispatch_semaphore_create(kFramesInFlight)) {}
 
+#if THORVG_RN_WEBGPU
   ~MetalSurface() override
   {
     if (wgSurface_) wgpuSurfaceRelease(wgSurface_);
@@ -107,6 +112,7 @@ class MetalSurface final : public Surface {
   {
     if (wgSurface_) wgpuSurfacePresent(wgSurface_);
   }
+#endif
 
   void present(const uint32_t *pixels, uint32_t width, uint32_t height) override
   {
@@ -169,14 +175,20 @@ class MetalSurface final : public Surface {
   dispatch_semaphore_t inflight_;
   std::array<id<MTLBuffer>, kFramesInFlight> buffers_{};
   size_t index_ = 0;
+#if THORVG_RN_WEBGPU
   WGPUSurface wgSurface_ = nullptr;
+#endif
 };
 
 }
 
 Gpu *platformGpu()
 {
+#if THORVG_RN_WEBGPU
   return WgGpu::shared();
+#else
+  return nullptr;
+#endif
 }
 
 std::shared_ptr<Surface> makeMetalSurface(CAMetalLayer *layer)

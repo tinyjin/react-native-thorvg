@@ -109,7 +109,8 @@ The JSI binding calls the ThorVG C API from `@thorvg/react-native-thorvg-core-an
 The JSI binding calls the ThorVG C API from `@thorvg/react-native-thorvg-core-ios` and draws into the view's `CAMetalLayer`.
 
 - Run `pod install` in your `ios` directory after installing the package.
-- iOS supports `'wg'` (WebGPU on Metal) and `'sw'`.
+- iOS supports `'sw'` and `'wg'` (WebGPU on Metal).
+- To enable WebGPU, install `@thorvg/react-native-thorvg-webgpu`, then run `pod install` again.
 
 ### Web
 
@@ -119,7 +120,8 @@ Web platform uses `@thorvg/webcanvas`, which provides `thorvg.wasm` from default
 useThorVG({ locateFile: (path) => 'https://example.com/path/to/' + path.split('/').pop() });
 ```
 
-Note: `init()` options `locateFile` and `threads` only apply on web.
+- `init()` options `locateFile` and `threads` only apply on web.
+- Web supports `'sw'`, `'gl'`, and `'wg'` as default
 
 ## Development
 

@@ -131,7 +131,6 @@ ios_min = '$IOS_MIN'
 iphoneos_sdk = '$iphoneos'
 simulator_sdk = '$simulator'" "$simd" cpu,wg lottie_exp -Dpkg_config_path="$BUILD/wgpu/$slice"
     strip -S "$BUILD/$slice/libthorvg.a" 2>/dev/null
-    libtool -static -o "$BUILD/$slice/libthorvg.a" "$BUILD/$slice/libthorvg.a" "$BUILD/wgpu/$slice/lib/libwgpu_native.a" 2>/dev/null
   done
 
   local stage="$BUILD/ios-stage"
@@ -140,7 +139,6 @@ simulator_sdk = '$simulator'" "$simd" cpu,wg lottie_exp -Dpkg_config_path="$BUIL
   cp "$BUILD/ios-arm64/libthorvg.a" "$stage/device/"
   lipo -create "$BUILD/ios-sim-arm64/libthorvg.a" "$BUILD/ios-sim-x86_64/libthorvg.a" -output "$stage/simulator/libthorvg.a"
   copy_headers "$stage/include"
-  cp -R "$BUILD/wgpu/ios-arm64/include/webgpu" "$stage/include/"
 
   rm -rf "$LIBS/ios"
   mkdir -p "$LIBS/ios"
@@ -149,6 +147,37 @@ simulator_sdk = '$simulator'" "$simd" cpu,wg lottie_exp -Dpkg_config_path="$BUIL
     -library "$stage/simulator/libthorvg.a" -headers "$stage/include" \
     -output "$LIBS/ios/thorvg.xcframework" > /dev/null
   echo "$VERSION" > "$LIBS/ios/VERSION"
+
+  # Stands in for wgpu-native when @thorvg/react-native-thorvg-webgpu is not installed, so the
+  # wg engine inside libthorvg links even without dead stripping. Never called: wg stays disabled.
+  local stub="$BUILD/wgpu-stub"
+  rm -rf "$stub"
+  mkdir -p "$stub/simulator"
+  nm -u "$BUILD/ios-arm64/libthorvg.a" | grep -E '^_wgpu' | sort -u | sed -E 's/^_(.*)/void* \1(void) { return 0; }/' > "$stub/stub.c"
+  xcrun --sdk iphoneos clang -c -Os -arch arm64 -miphoneos-version-min="$IOS_MIN" "$stub/stub.c" -o "$stub/device.o"
+  xcrun --sdk iphonesimulator clang -c -Os -arch arm64 -mios-simulator-version-min="$IOS_MIN" "$stub/stub.c" -o "$stub/sim-arm64.o"
+  xcrun --sdk iphonesimulator clang -c -Os -arch x86_64 -mios-simulator-version-min="$IOS_MIN" "$stub/stub.c" -o "$stub/sim-x86_64.o"
+  libtool -static -o "$stub/libwgpu_stub.a" "$stub/device.o" 2>/dev/null
+  libtool -static -o "$stub/simulator/libwgpu_stub.a" "$stub/sim-arm64.o" "$stub/sim-x86_64.o" 2>/dev/null
+  xcodebuild -create-xcframework \
+    -library "$stub/libwgpu_stub.a" \
+    -library "$stub/simulator/libwgpu_stub.a" \
+    -output "$LIBS/ios/wgpu-stub.xcframework" > /dev/null
+
+  # wgpu-native is linked only when @thorvg/react-native-thorvg-webgpu is installed.
+  local wgpu="$BUILD/wgpu-stage"
+  rm -rf "$wgpu"
+  mkdir -p "$wgpu/simulator" "$wgpu/include"
+  lipo -create "$BUILD/wgpu/ios-sim-arm64/lib/libwgpu_native.a" "$BUILD/wgpu/ios-sim-x86_64/lib/libwgpu_native.a" -output "$wgpu/simulator/libwgpu_native.a"
+  cp -R "$BUILD/wgpu/ios-arm64/include/webgpu" "$wgpu/include/"
+
+  rm -rf "$LIBS/webgpu/ios"
+  mkdir -p "$LIBS/webgpu/ios"
+  xcodebuild -create-xcframework \
+    -library "$BUILD/wgpu/ios-arm64/lib/libwgpu_native.a" -headers "$wgpu/include" \
+    -library "$wgpu/simulator/libwgpu_native.a" -headers "$wgpu/include" \
+    -output "$LIBS/webgpu/ios/wgpu.xcframework" > /dev/null
+  echo "$VERSION" > "$LIBS/webgpu/VERSION"
 }
 
 echo "ThorVG $VERSION"
