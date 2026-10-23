@@ -1,0 +1,70 @@
+---
+title: LottieView
+sidebar_position: 1
+---
+
+`LottieView` plays a Lottie animation in a view, without a canvas.
+
+![LottieView](/img/views/lottie-view.png)
+
+```tsx
+import { LottieView } from '@thorvg/react-native-thorvg';
+
+<LottieView
+  source={{ uri: 'https://example.com/animation.json' }}
+  autoplay
+  loop
+  style={{ width: 200, height: 200 }}
+/>
+```
+
+## Source
+
+| `source` | Loads |
+| --- | --- |
+| `require('./animation.json')` | A bundled Lottie JSON |
+| `{ uri, headers? }` | A URL. Requests for the same URL share one download |
+| A string | Lottie JSON |
+| An object | Parsed Lottie JSON |
+
+## Props
+
+| Prop | Description |
+| --- | --- |
+| `autoplay` | Plays after loading. Default `false` |
+| `loop` | Repeats the animation. Default `false` |
+| `speed` | Playback rate. Default `1` |
+| `mode` | `'forward'` (default), `'reverse'`, `'bounce'` or `'reverse-bounce'` |
+| `segment` | `[start, end]` frames or a marker name to play |
+| `progress` | 0 to 1. Shows that point of the segment and stops playback |
+| `slots` | Lottie slot data as an object or a JSON string |
+| `contentFit` | `'contain'` (default), `'cover'`, `'fill'`, `'none'` or `'scale-down'` |
+| `contentPosition` | `{ x, y }` from 0 to 1. Default `{ x: 0.5, y: 0.5 }` |
+
+All other `View` props are passed to the view.
+
+## Events
+
+| Event | Called |
+| --- | --- |
+| `onLoad(info)` | After loading, with `totalFrames`, `duration` and `fps` |
+| `onError(error)` | When loading fails |
+| `onFrame(frame)` | After each frame is drawn |
+| `onLoop()` | At the end of each loop |
+| `onComplete()` | When a playback without `loop` ends |
+
+## Ref
+
+```tsx
+const lottie = useRef<LottieView>(null);
+
+lottie.current?.pause();
+```
+
+| Member | Description |
+| --- | --- |
+| `play()`, `pause()` | Starts or pauses playback |
+| `stop()` | Pauses and returns to the start of the segment |
+| `seek(frame)` | Shows a frame |
+| `animation` | The WebCanvas [`LottieAnimation`](https://thorvg.github.io/thorvg.web/classes/LottieAnimation.html) |
+| `canvas` | The WebCanvas [`Canvas`](https://thorvg.github.io/thorvg.web/classes/Canvas.html) |

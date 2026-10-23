@@ -18,4 +18,5 @@ export const categories = [
   { key: 'text', label: 'Text' },
   { key: 'media', label: 'Media' },
   { key: 'components', label: 'Components' },
+  { key: 'views', label: 'Views' },
 ] as const;

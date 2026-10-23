@@ -25,6 +25,12 @@ const sidebars: SidebarsConfig = {
       collapsed: false,
       items: ['guides/canvas', 'guides/animation', 'guides/lottie', 'guides/text'],
     },
+    {
+      type: 'category',
+      label: 'Views',
+      collapsed: false,
+      items: ['views/lottie-view', 'views/svg-view'],
+    },
     'api',
     'platforms',
     'examples',

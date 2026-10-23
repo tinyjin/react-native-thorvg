@@ -61,9 +61,11 @@ import ComponentsMasking from './components-masking';
 import ComponentsPicture from './components-picture';
 import ComponentsText from './components-text';
 import ComponentsLottie from './components-lottie';
+import ViewsLottie from './views-lottie';
+import ViewsSvg from './views-svg';
 
 export type ExampleCategory =
-  'basic' | 'advanced' | 'text' | 'media' | 'components';
+  'basic' | 'advanced' | 'text' | 'media' | 'components' | 'views';
 
 export interface Example {
   id: string;
@@ -568,5 +570,21 @@ export const examples: Example[] = [
     category: 'components',
     thumbnail: require('../../assets/thumbnails/components-lottie.png'),
     Component: ComponentsLottie,
+  },
+  {
+    id: 'views-lottie',
+    title: 'LottieView',
+    description: 'Play a Lottie from a URL with modes, speed and controls',
+    category: 'views',
+    thumbnail: require('../../assets/thumbnails/views-lottie.png'),
+    Component: ViewsLottie,
+  },
+  {
+    id: 'views-svg',
+    title: 'SvgView',
+    description: 'Show SVG from a URL or a string with fit and tint',
+    category: 'views',
+    thumbnail: require('../../assets/thumbnails/views-svg.png'),
+    Component: ViewsSvg,
   },
 ];

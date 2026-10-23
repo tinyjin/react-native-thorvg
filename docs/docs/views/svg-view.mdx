@@ -1,0 +1,45 @@
+---
+title: SvgView
+sidebar_position: 2
+---
+
+`SvgView` shows an SVG in a view, without a canvas.
+
+![SvgView](/img/views/svg-view.png)
+
+```tsx
+import { SvgView } from '@thorvg/react-native-thorvg';
+
+<SvgView
+  source={{ uri: 'https://example.com/logo.svg' }}
+  tintColor="#2563eb"
+  style={{ width: 120, height: 120 }}
+/>
+```
+
+## Source
+
+| `source` | Loads |
+| --- | --- |
+| `require('./logo.svg')` | A bundled SVG file |
+| `{ uri, headers? }` | A URL. Requests for the same URL share one download |
+| A string | SVG markup |
+
+## Props
+
+| Prop | Description |
+| --- | --- |
+| `contentFit` | `'contain'` (default), `'cover'`, `'fill'`, `'none'` or `'scale-down'` |
+| `contentPosition` | `{ x, y }` from 0 to 1. Default `{ x: 0.5, y: 0.5 }` |
+| `tintColor` | Draws the SVG in one [color](../components/overview#colors), keeping its alpha |
+| `onLoad(size)` | Called after loading with the `width` and `height` of the SVG |
+| `onError(error)` | Called when loading fails |
+
+All other `View` props are passed to the view.
+
+## Ref
+
+| Member | Description |
+| --- | --- |
+| `picture` | The WebCanvas [`Picture`](https://thorvg.github.io/thorvg.web/classes/Picture.html) |
+| `canvas` | The WebCanvas [`Canvas`](https://thorvg.github.io/thorvg.web/classes/Canvas.html) |

@@ -14,7 +14,7 @@ npm install @thorvg/react-native-thorvg
 
 ## Usage
 
-### Declarative API (Components)
+### Components (Declarative API)
 
 Import the components and render them inside `Canvas`.
 
@@ -55,71 +55,66 @@ const Example = () => {
 }
 ```
 
+### Views
+
+#### LottieView
+
+ThorVG provides a powerful Lottie runtime. You can play Lottie animations without installing any additional packages.
+
+```tsx
+import { LottieView } from '@thorvg/react-native-thorvg';
+
+<LottieView
+  source={require('./confetti.json')}
+  autoplay
+  loop
+  style={{ width: 200, height: 200 }}
+/>
+```
+
+#### SvgView
+
+SVG support is built into ThorVG. You can load SVG files directly.
+
+```tsx
+import { SvgView } from '@thorvg/react-native-thorvg';
+
+<SvgView
+  source={{ uri: 'https://example.com/logo.svg' }}
+  style={{ width: 120, height: 120 }}
+/>
+```
+
 ## Requirements
 
 - React Native with the New Architecture
 - iOS 15.1+, Android API 24+
 
-## Key Features
+## Architecture
 
-### Canvas
 The Core API is compatible with [`@thorvg/webcanvas`](https://www.npmjs.com/package/@thorvg/webcanvas). On iOS and Android follow same classes run on the native ThorVG engine through [JSI](https://reactnative.dev/architecture/glossary#javascript-interfaces-jsi).
 
 <p align="center">
   <img width="600" src="docs/static/img/architecture.svg" alt="react-native-thorvg architecture">
 </p>
 
-**Properties**
-
-| Prop | Description |
-| --- | --- |
-| `androidBackingView` | `'TextureView'` (default) or `'SurfaceView'`. A `SurfaceView` composites on its own layer and does not blend with views behind it. |
-| `ref` | Receives the view that `new TVG.Canvas(ref, options)` draws into. |
-
-Note: Video playback and FontProvider aren't supported.
-
-### Lottie animation
-
-ThorVG provides a powerful Lottie playback runtime. You can run Lottie animations on a canvas without installing any additional packages.
-
-
-```tsx
-useEffect(() => {
-  if (!TVG) return;
-  const canvas = new TVG.Canvas(view, { width: 200, height: 200 });
-
-  const animation = new TVG.LottieAnimation();
-  animation.load(JSON.stringify(lottieJson));
-  animation.picture!.size(200, 200);
-  canvas.add(animation.picture!);
-  animation.play(() => canvas.update().render());
-
-  return () => {
-    animation.dispose();
-    canvas.destroy();
-  };
-}, [TVG]);
-```
-
-Note: Default Lottie audio playback is not available. Use `LottieAnimation.resolver()` to enable.
-
 ## Platform Notes
 
-## Android
+### Android
 
 The JSI binding calls the ThorVG C API from `@thorvg/react-native-thorvg-core-android` and draws into the view's Android `Surface`.
 
 - Canvases render into a `TextureView` by default.
 - Android supports `'gl'` (OpenGL ES) and `'sw'`.
 
-## iOS
+### iOS
 
 The JSI binding calls the ThorVG C API from `@thorvg/react-native-thorvg-core-ios` and draws into the view's `CAMetalLayer`.
 
 - Run `pod install` in your `ios` directory after installing the package.
 - iOS supports `'wg'` (WebGPU on Metal) and `'sw'`.
 
-## Web
+### Web
 
 Web platform uses `@thorvg/webcanvas`, which provides `thorvg.wasm` from default CDN. To serve it yourself, specify your own WASM URL:
 
