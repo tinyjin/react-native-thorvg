@@ -58,6 +58,7 @@ CanvasHost::~CanvasHost() {
     canvas_ = nullptr;
   }
   surface_.reset();
+  bound_.reset();
 }
 
 Tvg_Result CanvasHost::resize(uint32_t width, uint32_t height) {
@@ -86,12 +87,8 @@ Tvg_Result CanvasHost::render() {
 
   if (gpu_) {
     drawn_ = true;
-    if (!bindLocked()) return TVG_RESULT_SUCCESS;
-    tvg_canvas_update(canvas_);
-    auto result = tvg_canvas_draw(canvas_, true);
-    tvg_canvas_sync(canvas_);
-    surface_->swap();
-    return result;
+    requestFrameLocked();
+    return TVG_RESULT_SUCCESS;
   }
 
   if (buffer_.empty()) return TVG_RESULT_INSUFFICIENT_CONDITION;
@@ -139,13 +136,7 @@ void CanvasHost::attach(std::shared_ptr<Surface> surface) {
   }
 
   targeted_ = false;
-  if (!drawn_) return;
-  std::lock_guard<std::mutex> scheduler(gSchedulerMutex);
-  if (gScheduler) {
-    gScheduler([weak = weak_from_this()] {
-      if (auto host = weak.lock()) host->render();
-    });
-  }
+  if (drawn_) requestFrameLocked();
 }
 
 void CanvasHost::detach() {
@@ -160,6 +151,26 @@ void CanvasHost::presentLocked() {
   }
 }
 
+void CanvasHost::requestFrameLocked() {
+  if (framePending_) return;
+  std::lock_guard<std::mutex> lock(gSchedulerMutex);
+  if (!gScheduler) return;
+  framePending_ = true;
+  gScheduler([weak = weak_from_this()] {
+    if (auto host = weak.lock()) host->drawFrame();
+  });
+}
+
+void CanvasHost::drawFrame() {
+  std::lock_guard<std::mutex> lock(mutex_);
+  framePending_ = false;
+  if (!canvas_ || !bindLocked()) return;
+  tvg_canvas_update(canvas_);
+  tvg_canvas_draw(canvas_, true);
+  tvg_canvas_sync(canvas_);
+  surface_->swap();
+}
+
 bool CanvasHost::bindLocked() {
   if (!gpu_) return true;
   gpu_->bind(surface_.get());
@@ -167,6 +178,7 @@ bool CanvasHost::bindLocked() {
   if (!targeted_) {
     tvg_canvas_sync(canvas_);
     targeted_ = surface_->target(canvas_, width_, height_) == TVG_RESULT_SUCCESS;
+    if (targeted_) bound_ = surface_;
   }
   return targeted_;
 }

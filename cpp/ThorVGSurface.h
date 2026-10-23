@@ -62,16 +62,20 @@ class CanvasHost : public std::enable_shared_from_this<CanvasHost> {
  private:
   void presentLocked();
   bool bindLocked();
+  void requestFrameLocked();
+  void drawFrame();
 
   std::mutex mutex_;
   Tvg_Canvas canvas_ = nullptr;
   Gpu* gpu_ = nullptr;
   bool targeted_ = false;
+  bool framePending_ = false;
   std::vector<uint32_t> buffer_;
   uint32_t width_ = 0;
   uint32_t height_ = 0;
   bool drawn_ = false;
   std::shared_ptr<Surface> surface_;
+  std::shared_ptr<Surface> bound_;
   int surfaceId_;
 };
 
