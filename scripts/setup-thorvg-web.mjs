@@ -23,5 +23,12 @@ if (!existsSync(wasm)) {
 mkdirSync(target, { recursive: true });
 copyFileSync(wasm, join(target, 'thorvg.wasm'));
 
-console.log(`Copied thorvg.wasm to ${target}`);
+// Handle thread preset build
+mkdirSync(join(target, 'thread'), { recursive: true });
+for (const file of ['webcanvas.esm.js', 'thorvg.wasm']) {
+  copyFileSync(join(dist, 'thread', file), join(target, 'thread', file));
+}
+
+console.log(`Copied thorvg.wasm and thread/ to ${target}`);
 console.log("Load it with init({ locateFile: (path) => '/' + path.split('/').pop() })");
+console.log("With threads, use init({ threads, locateFile: (path) => '/thread/' + path.split('/').pop() })");

@@ -1,7 +1,7 @@
-import {
+import type {
   Canvas as WebCanvas,
-  type CanvasOptions,
-  type CanvasTarget as WebCanvasTarget,
+  CanvasOptions,
+  CanvasTarget as WebCanvasTarget,
 } from '@thorvg/webcanvas';
 import {
   bindCanvas,
@@ -24,59 +24,65 @@ function fit(element: unknown): void {
   style.height = '100%';
 }
 
-export class Canvas extends WebCanvas {
-  constructor(
-    target: string | WebCanvasTarget | CanvasTarget | CanvasRef,
-    options: CanvasOptions = {}
-  ) {
-    const surface = resolveTarget(target);
-    if (!surface && isCanvasRef(target)) {
-      throw new Error('ThorVG: the Canvas view is not mounted');
-    }
-    super(
-      (surface ? surface.element : target) as string | WebCanvasTarget,
-      surface
-        ? {
-            ...options,
-            width: options.width ?? Math.max(1, surface.width),
-            height: options.height ?? Math.max(1, surface.height),
-          }
-        : options
-    );
-    if (!surface) return;
-
-    elements.set(this, surface.element);
-    targets.set(this, surface);
-    bindCanvas(surface, this);
-    fit(surface.element);
-    if (options.width !== undefined && options.height !== undefined) {
-      setDrawingSize(surface, { width: options.width, height: options.height });
-    } else {
-      subscriptions.set(
-        this,
-        surface.subscribe((width, height) => {
-          this.resize(options.width ?? width, options.height ?? height);
-          this.render();
-        })
+// The threaded build has its own Canvas class, so the view support extends whichever build is loaded.
+export function createCanvas(Base: typeof WebCanvas) {
+  return class Canvas extends Base {
+    constructor(
+      target: string | WebCanvasTarget | CanvasTarget | CanvasRef,
+      options: CanvasOptions = {}
+    ) {
+      const surface = resolveTarget(target);
+      if (!surface && isCanvasRef(target)) {
+        throw new Error('ThorVG: the Canvas view is not mounted');
+      }
+      super(
+        (surface ? surface.element : target) as string | WebCanvasTarget,
+        surface
+          ? {
+              ...options,
+              width: options.width ?? Math.max(1, surface.width),
+              height: options.height ?? Math.max(1, surface.height),
+            }
+          : options
       );
-    }
-  }
+      if (!surface) return;
 
-  override resize(width: number, height: number): this {
-    super.resize(width, height);
-    fit(elements.get(this));
-    return this;
-  }
-
-  override destroy(): void {
-    subscriptions.get(this)?.();
-    subscriptions.delete(this);
-    const target = targets.get(this);
-    if (target) {
-      if (target.canvas === this) setDrawingSize(target, null);
-      unbindCanvas(target, this);
+      elements.set(this, surface.element);
+      targets.set(this, surface);
+      bindCanvas(surface, this);
+      fit(surface.element);
+      if (options.width !== undefined && options.height !== undefined) {
+        setDrawingSize(surface, {
+          width: options.width,
+          height: options.height,
+        });
+      } else {
+        subscriptions.set(
+          this,
+          surface.subscribe((width, height) => {
+            this.resize(options.width ?? width, options.height ?? height);
+            this.render();
+          })
+        );
+      }
     }
-    targets.delete(this);
-    super.destroy();
-  }
+
+    override resize(width: number, height: number): this {
+      super.resize(width, height);
+      fit(elements.get(this));
+      return this;
+    }
+
+    override destroy(): void {
+      subscriptions.get(this)?.();
+      subscriptions.delete(this);
+      const target = targets.get(this);
+      if (target) {
+        if (target.canvas === this) setDrawingSize(target, null);
+        unbindCanvas(target, this);
+      }
+      targets.delete(this);
+      super.destroy();
+    }
+  };
 }

@@ -55,6 +55,29 @@ and pass `locateFile`:
 useThorVG({ locateFile: (path) => '/' + path.split('/').pop() });
 ```
 
+### Threads
+
+`threads` runs the engine with worker threads on every platform. It defaults to `0`.
+
+```ts
+useThorVG({ threads: 4 });
+```
+
+On web it loads the threaded WebCanvas build, which needs a [cross-origin isolated](https://developer.mozilla.org/en-US/docs/Web/API/Window/crossOriginIsolated) page. Serve your page with:
+
+```
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+```
+
+Without these headers, ThorVG runs without worker threads and logs a warning in development.
+
+The threaded build is imported at runtime from unpkg, so a Content Security Policy must allow `'unsafe-eval'` and the script origin. To serve it yourself, `npx setup-thorvg-web public` also copies it into `public/thread`:
+
+```ts
+useThorVG({ threads: 4, locateFile: (path) => '/thread/' + path.split('/').pop() });
+```
+
 ## Differences from WebCanvas
 
 | Feature | Android and iOS | Web |
@@ -62,4 +85,4 @@ useThorVG({ locateFile: (path) => '/' + path.split('/').pop() });
 | `TVG.Video` | Not available | Not exposed by this package |
 | `Font.load(name)` with the default provider | Needs `Font.provider()` | Fontsource |
 | Lottie audio playback | Events through `resolver()` only | Built in |
-| `locateFile`, `threads` | Ignored | Supported |
+| `locateFile` | Ignored | Supported |

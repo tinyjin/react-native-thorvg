@@ -1,5 +1,7 @@
 // Generated from @thorvg/webcanvas@1.1.3 by scripts/generate-constants.mjs. Do not edit.
 
+export const WEBCANVAS_VERSION = '1.1.3';
+
 export enum BlendMethod {
   Normal = 0,
   Multiply = 1,

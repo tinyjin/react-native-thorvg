@@ -744,13 +744,19 @@ std::string engineVersion() {
 
 }
 
-void install(jsi::Runtime& rt, std::shared_ptr<facebook::react::CallInvoker> callInvoker) {
-  static std::once_flag engine;
-  std::call_once(engine, [] {
-    tvg_engine_init(0);
-    tvg_font_load_data("default", requestFont(), DEFAULT_FONT_SIZE, "ttf", false);
+void installEngine(Builder& b) {
+  b.fn("engine_init", 1, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) {
+    static std::once_flag engine;
+    auto threads = Arg<uint32_t>::get(rt, at(args, count, 0));
+    std::call_once(engine, [threads] {
+      tvg_engine_init(threads);
+      tvg_font_load_data("default", requestFont(), DEFAULT_FONT_SIZE, "ttf", false);
+    });
+    return jsi::Value::undefined();
   });
+}
 
+void install(jsi::Runtime& rt, std::shared_ptr<facebook::react::CallInvoker> callInvoker) {
   gRuntime = &rt;
   setScheduler([callInvoker = std::move(callInvoker)](std::function<void()> task) {
     callInvoker->invokeAsync(std::move(task));
@@ -758,6 +764,7 @@ void install(jsi::Runtime& rt, std::shared_ptr<facebook::react::CallInvoker> cal
 
   jsi::Object module(rt);
   Builder builder(rt, module);
+  installEngine(builder);
   installHandles(builder);
   installCanvas(builder);
   installPaint(builder);

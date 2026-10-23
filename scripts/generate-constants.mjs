@@ -40,9 +40,10 @@ const body = enums
   .join('\n');
 
 const banner = `// Generated from @thorvg/webcanvas@${pkg.version} by scripts/generate-constants.mjs. Do not edit.\n\n`;
+const version = `export const WEBCANVAS_VERSION = '${pkg.version}';\n\n`;
 
 mkdirSync(dirname(output), { recursive: true });
-const next = banner + body;
+const next = banner + version + body;
 let previous = '';
 try {
   previous = readFileSync(output, 'utf8');

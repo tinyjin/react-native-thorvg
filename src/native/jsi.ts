@@ -10,6 +10,8 @@ type Bytes = ArrayBufferView | ArrayBuffer;
 export interface ThorVGJSI {
   readonly version: string;
 
+  engine_init(threads: number): void;
+
   disown(handle: Handle): void;
   address(handle: Handle): number;
 

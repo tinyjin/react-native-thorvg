@@ -27,6 +27,7 @@ export async function createNamespace(
     throw new Error('ThorVG native bindings are not available');
   }
 
+  getJSI().engine_init(options.threads ?? 0);
   setGlobalErrorHandler(options.onError);
   setRenderer(options.renderer);
 

@@ -33,8 +33,8 @@ Initializes ThorVG outside of React. `init()` and `useThorVG()` share one initia
 | --- | --- | --- |
 | `renderer` | All | `'sw'`, `'gl'` or `'wg'`. See [Platforms](./platforms) for what each platform supports |
 | `onError` | All | Receives errors instead of throwing them. See [Errors](#errors) |
-| `locateFile` | Web | Resolves the URL of `thorvg.wasm`. Defaults to unpkg |
-| `threads` | Web | Worker thread count for the threaded WebCanvas build |
+| `locateFile` | Web | Resolves the URL of `thorvg.wasm`, and of `webcanvas.esm.js` when `threads` is set. Defaults to unpkg |
+| `threads` | All | Worker thread count. Defaults to `0`. On web it needs a cross-origin isolated page, see [Threads](./platforms#threads) |
 
 ## `ThorVG`
 

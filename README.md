@@ -120,7 +120,8 @@ Web platform uses `@thorvg/webcanvas`, which provides `thorvg.wasm` from default
 useThorVG({ locateFile: (path) => 'https://example.com/path/to/' + path.split('/').pop() });
 ```
 
-- `init()` options `locateFile` and `threads` only apply on web.
+- `init()` option `locateFile` only applies on web.
+- `threads` needs the COOP/COEP headers on web. See [Threads](https://tinyjin.github.io/react-native-thorvg/platforms#threads).
 - Web supports `'sw'`, `'gl'`, and `'wg'` as default
 
 ## Development
