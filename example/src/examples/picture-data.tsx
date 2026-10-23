@@ -1,0 +1,95 @@
+import { useEffect, useRef } from 'react';
+import { useThorVG, type Canvas } from '@thorvg/react-native-thorvg';
+
+const Example = () => {
+  const TVG = useThorVG({ renderer: 'sw' });
+  const canvasRef = useRef<Canvas>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!TVG || !canvas) return;
+    let active = true;
+    let rafId = 0;
+
+    // Native example: PictureData.cpp
+
+    const buffer = new Uint8Array(800 * 800 * 4);
+
+    const generate = () => {
+      // generate the content image
+      for (let i = 0; i < 800 * 800 * 4; i += 4) {
+        buffer[i + 0] = 255;
+        buffer[i + 1] = Math.floor(Math.random() * 255);
+        buffer[i + 2] = Math.floor(Math.random() * 255);
+        buffer[i + 3] = Math.floor(Math.random() * 255);
+      }
+    };
+
+    generate();
+
+    // picture 1
+    const picture1 = new TVG.Picture();
+    picture1.scale(0.375);
+
+    // load the picture raw image data
+    picture1.load(buffer, {
+      type: 'raw',
+      width: 800,
+      height: 800,
+      colorSpace: TVG.ColorSpace.ABGR8888,
+    });
+
+    canvas.add(picture1);
+
+    // picture 2
+    const picture2 = new TVG.Picture();
+    picture2.translate(300, 300);
+    picture2.scale(0.375);
+
+    // load the picture raw image data
+    picture2.load(buffer, {
+      type: 'raw',
+      width: 800,
+      height: 800,
+      colorSpace: TVG.ColorSpace.ABGR8888,
+    });
+
+    canvas.add(picture2);
+
+    const animate = () => {
+      generate();
+
+      // only reload the picture1 image
+      picture1.load(buffer, {
+        type: 'raw',
+        width: 800,
+        height: 800,
+        colorSpace: TVG.ColorSpace.ABGR8888,
+      });
+
+      canvas.update();
+      canvas.render();
+
+      if (active) rafId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      active = false;
+      cancelAnimationFrame(rafId);
+    };
+  }, [TVG]);
+
+  if (!TVG) return null;
+  return (
+    <TVG.Canvas
+      ref={canvasRef}
+      width={600}
+      height={600}
+      style={{ width: '100%', aspectRatio: 1 }}
+    />
+  );
+};
+
+export default Example;

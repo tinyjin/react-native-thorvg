@@ -24,6 +24,23 @@ export default defineConfig([
     },
   },
   {
-    ignores: ['node_modules/', 'lib/', 'example/dist/'],
+    files: ['example/src/examples/**/*.tsx'],
+    languageOptions: {
+      globals: { performance: 'readonly' },
+    },
+    rules: {
+      'no-lone-blocks': 'off',
+      '@typescript-eslint/no-shadow': 'off',
+      'react-native/no-inline-styles': 'off',
+    },
+  },
+  {
+    ignores: [
+      'node_modules/',
+      'lib/',
+      'example/dist/',
+      'example/ios/',
+      'example/android/',
+    ],
   },
 ]);

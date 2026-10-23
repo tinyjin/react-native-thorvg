@@ -42,7 +42,7 @@
     "generate": "node scripts/generate-constants.mjs",
     "clean": "del-cli lib android/build android/.cxx example/android/build example/android/app/build example/ios/build",
     "prepare": "node scripts/generate-constants.mjs && bob build",
-    "typecheck": "tsc",
+    "typecheck": "tsc && tsc -p example",
     "lint": "eslint \"**/*.{js,ts,tsx}\""
   },
   "keywords": [
