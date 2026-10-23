@@ -1,17 +1,16 @@
+// Native example: BoundingBox.cpp
+
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG, type Paint } from '@thorvg/react-native-thorvg';
-import { loadBytes, loadText } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
     if (!TVG) return;
     const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
-
-    // Native example: BoundingBox.cpp
 
     const bbox = (paint: Paint) => {
       //aabb
@@ -61,7 +60,9 @@ const Example = () => {
       }
 
       {
-        const data = await loadBytes('/fonts/PublicSans-Regular.ttf');
+        const data = await fetch('/fonts/PublicSans-Regular.ttf')
+          .then((res) => res.arrayBuffer())
+          .then((buffer) => new Uint8Array(buffer));
         if (!active) return;
         TVG.Font.load('PublicSans-Regular', data, { type: 'ttf' });
         const text = new TVG.Text();
@@ -110,7 +111,9 @@ const Example = () => {
 
       {
         const svg = new TVG.Picture();
-        const data = await loadText('/assets/svg/tiger.svg');
+        const data = await fetch('/assets/svg/tiger.svg').then((res) =>
+          res.text()
+        );
         if (!active) return;
         svg.load(data, { type: 'svg' });
         svg.scale(0.2);
@@ -121,7 +124,9 @@ const Example = () => {
 
       {
         const svg = new TVG.Picture();
-        const data = await loadText('/assets/svg/tiger.svg');
+        const data = await fetch('/assets/svg/tiger.svg').then((res) =>
+          res.text()
+        );
         if (!active) return;
         svg.load(data, { type: 'svg' });
         svg.scale(0.1333);
@@ -137,7 +142,9 @@ const Example = () => {
         scene.translate(186.67, 220);
 
         const img = new TVG.Picture();
-        const data = await loadBytes('/assets/images/test.png');
+        const data = await fetch('/assets/images/test.png')
+          .then((res) => res.arrayBuffer())
+          .then((buffer) => new Uint8Array(buffer));
         if (!active) return;
         img.load(data, { type: 'png' });
         scene.add(img);
@@ -153,7 +160,9 @@ const Example = () => {
         scene.translate(133.33, 320);
 
         const img = new TVG.Picture();
-        const data = await loadBytes('/assets/images/test.jpg');
+        const data = await fetch('/assets/images/test.jpg')
+          .then((res) => res.arrayBuffer())
+          .then((buffer) => new Uint8Array(buffer));
         if (!active) return;
         img.load(data, { type: 'jpg' });
         scene.add(img);
@@ -320,7 +329,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

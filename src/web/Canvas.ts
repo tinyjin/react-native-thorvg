@@ -6,6 +6,7 @@ import {
 import {
   bindCanvas,
   isCanvasRef,
+  setDrawingSize,
   resolveTarget,
   type CanvasRef,
   type CanvasTarget,
@@ -48,7 +49,9 @@ export class Canvas extends WebCanvas {
     targets.set(this, surface);
     bindCanvas(surface, this);
     fit(surface.element);
-    if (options.width === undefined || options.height === undefined) {
+    if (options.width !== undefined && options.height !== undefined) {
+      setDrawingSize(surface, { width: options.width, height: options.height });
+    } else {
       subscriptions.set(
         this,
         surface.subscribe((width, height) => {
@@ -69,7 +72,10 @@ export class Canvas extends WebCanvas {
     subscriptions.get(this)?.();
     subscriptions.delete(this);
     const target = targets.get(this);
-    if (target) unbindCanvas(target, this);
+    if (target) {
+      if (target.canvas === this) setDrawingSize(target, null);
+      unbindCanvas(target, this);
+    }
     targets.delete(this);
     super.destroy();
   }

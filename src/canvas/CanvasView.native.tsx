@@ -4,6 +4,7 @@ import ThorVGView from '../specs/ThorVGViewNativeComponent';
 import type { CanvasViewProps } from '../types';
 import { assignRef } from './assignRef';
 import { CanvasTarget } from './CanvasTarget';
+import { useDefaultSize } from './useDefaultSize';
 
 let nextSurfaceId = 1;
 
@@ -11,9 +12,11 @@ export function CanvasView({
   ref,
   androidBackingView,
   onLayout,
+  style,
   ...rest
 }: CanvasViewProps) {
   const [surface] = useState(() => new CanvasTarget(nextSurfaceId++));
+  const viewStyle = useDefaultSize(surface, style);
 
   useLayoutEffect(() => {
     assignRef(ref, surface);
@@ -32,6 +35,7 @@ export function CanvasView({
   return (
     <ThorVGView
       {...rest}
+      style={viewStyle}
       surfaceId={surface.surfaceId}
       androidBackingView={androidBackingView}
       onLayout={handleLayout}

@@ -1,8 +1,10 @@
+// Native example: MotionBlur.cpp
+
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG, type Shape } from '@thorvg/react-native-thorvg';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
@@ -10,8 +12,6 @@ const Example = () => {
     const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
     let rafId = 0;
-
-    // Native example: MotionBlur.cpp
 
     const circles: Shape[] = [];
 
@@ -91,7 +91,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

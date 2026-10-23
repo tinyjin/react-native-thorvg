@@ -7,17 +7,18 @@ import {
   Text,
   TextWrapMode,
 } from '@thorvg/react-native-thorvg';
-import { loadBytes } from './assets';
 
 const Example = () => {
   const [font, setFont] = useState<Uint8Array>();
 
   useEffect(() => {
-    loadBytes('/fonts/PublicSans-Regular.ttf').then(setFont);
+    fetch('/fonts/PublicSans-Regular.ttf')
+      .then((res) => res.arrayBuffer())
+      .then((buffer) => setFont(new Uint8Array(buffer)));
   }, []);
 
   return (
-    <Canvas width={600} height={600} style={{ width: '100%', aspectRatio: 1 }}>
+    <Canvas width={600} height={600}>
       <Rect x={0} y={0} width={600} height={600} fill="#ffffff" />
       {font && <Font name="PublicSans" data={font} type="ttf" />}
       <Text

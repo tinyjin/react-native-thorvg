@@ -1,3 +1,4 @@
+import './examples/assets';
 import { useEffect, useState } from 'react';
 import {
   BackHandler,
@@ -22,7 +23,7 @@ function exampleFromUrl(url: string | null | undefined): Example | null {
 }
 
 function Root() {
-  const TVG = useThorVG({ renderer: 'sw', onError: reportError });
+  const TVG = useThorVG({ onError: reportError });
   const [selected, setSelected] = useState<Example | null>(null);
 
   useEffect(() => {

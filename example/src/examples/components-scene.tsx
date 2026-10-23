@@ -22,7 +22,7 @@ const Example = () => {
   }, []);
 
   return (
-    <Canvas width={600} height={600} style={{ width: '100%', aspectRatio: 1 }}>
+    <Canvas width={600} height={600}>
       <Rect x={0} y={0} width={600} height={600} fill="#ffffff" />
       <Scene
         translate={{ x: 300, y: 300 }}

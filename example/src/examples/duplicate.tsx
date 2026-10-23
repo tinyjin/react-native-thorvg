@@ -1,3 +1,5 @@
+// Native example: Duplicate.cpp
+
 import { useEffect, useRef } from 'react';
 import {
   Canvas,
@@ -7,18 +9,15 @@ import {
   type Shape,
   type Text,
 } from '@thorvg/react-native-thorvg';
-import { loadBytes, loadText } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
     if (!TVG) return;
     const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
-
-    // Native example: Duplicate.cpp
 
     (async () => {
       //Duplicate Shapes
@@ -82,7 +81,9 @@ const Example = () => {
 
       //Duplicate Picture - svg
       {
-        const svgData = await loadText('/assets/svg/2684.svg');
+        const svgData = await fetch('/assets/svg/2684.svg').then((res) =>
+          res.text()
+        );
         if (!active) return;
 
         const picture1 = new TVG.Picture();
@@ -99,7 +100,9 @@ const Example = () => {
 
       //Duplicate Picture - raw
       {
-        const data = await loadBytes('/assets/images/rawimage_200x300.raw');
+        const data = await fetch('/assets/images/rawimage_200x300.raw')
+          .then((res) => res.arrayBuffer())
+          .then((buffer) => new Uint8Array(buffer));
         if (!active) return;
 
         const picture1 = new TVG.Picture();
@@ -123,7 +126,9 @@ const Example = () => {
 
       //Duplicate Text
       {
-        const data = await loadBytes('/fonts/PublicSans-Regular.ttf');
+        const data = await fetch('/fonts/PublicSans-Regular.ttf')
+          .then((res) => res.arrayBuffer())
+          .then((buffer) => new Uint8Array(buffer));
         if (!active) return;
         TVG.Font.load('PublicSans-Regular', data, { type: 'ttf' });
 
@@ -152,7 +157,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

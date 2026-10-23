@@ -1,12 +1,13 @@
+// Native example: LottieInteraction.cpp
+
 import { useEffect, useRef } from 'react';
 import type { GestureResponderEvent } from 'react-native';
 import { Canvas, useThorVG } from '@thorvg/react-native-thorvg';
-import { loadText } from './assets';
 
 type Point = { x: number; y: number };
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
   const layout = useRef({ width: 600, height: 600 });
   const pointer = useRef<{
@@ -21,13 +22,14 @@ const Example = () => {
     let active = true;
     let rafId = 0;
 
-    // Native example: LottieInteraction.cpp
     // Drag on the canvas to spin the animation. A quick flick spins it further.
 
     const SIZE = 600;
 
     (async () => {
-      const data = await loadText('/assets/lottie/extensions/spin.json');
+      const data = await fetch('/assets/lottie/extensions/spin.json').then(
+        (res) => res.text()
+      );
       if (!active) return;
 
       //LottieAnimation Controller
@@ -186,7 +188,6 @@ const Example = () => {
   return (
     <Canvas
       ref={canvasRef}
-      style={{ width: '100%', aspectRatio: 1 }}
       onLayout={(e) => {
         layout.current = e.nativeEvent.layout;
       }}

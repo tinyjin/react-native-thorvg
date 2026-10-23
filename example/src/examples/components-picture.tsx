@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
 import { Canvas, Picture, Rect } from '@thorvg/react-native-thorvg';
-import { loadBytes, loadText } from './assets';
 
 const Example = () => {
   const [svg, setSvg] = useState<string>();
   const [png, setPng] = useState<Uint8Array>();
 
   useEffect(() => {
-    loadText('/assets/svg/tiger.svg').then(setSvg);
-    loadBytes('/assets/images/test.png').then(setPng);
+    fetch('/assets/svg/tiger.svg')
+      .then((res) => res.text())
+      .then(setSvg);
+    fetch('/assets/images/test.png')
+      .then((res) => res.arrayBuffer())
+      .then((buffer) => setPng(new Uint8Array(buffer)));
   }, []);
 
   return (
-    <Canvas width={600} height={600} style={{ width: '100%', aspectRatio: 1 }}>
+    <Canvas width={600} height={600}>
       <Rect x={0} y={0} width={600} height={600} fill="#ffffff" />
       {svg && (
         <Picture

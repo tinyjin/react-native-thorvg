@@ -1,17 +1,16 @@
+// Native example: StrokeMiterlimit.cpp
+
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG } from '@thorvg/react-native-thorvg';
-import { loadBytes } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
     if (!TVG) return;
     const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
-
-    // Native example: StrokeMiterlimit.cpp
 
     //background
     {
@@ -53,7 +52,9 @@ const Example = () => {
       //blueprint
       {
         // Load png file.
-        const data = await loadBytes('/assets/images/stroke-miterlimit.png');
+        const data = await fetch('/assets/images/stroke-miterlimit.png')
+          .then((res) => res.arrayBuffer())
+          .then((buffer) => new Uint8Array(buffer));
         if (!active) return;
 
         const picture = new TVG.Picture();
@@ -135,7 +136,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

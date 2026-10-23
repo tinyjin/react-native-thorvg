@@ -6,13 +6,13 @@ sidebar_position: 1
 
 `@thorvg/react-native-thorvg` brings [ThorVG](https://github.com/thorvg/thorvg) vector graphics and Lottie to React Native on Android, iOS and web.
 
-It offers two APIs. The components draw declaratively with JSX. The [`@thorvg/webcanvas`](https://www.npmjs.com/package/@thorvg/webcanvas) API draws imperatively. On web the package runs `@thorvg/webcanvas` itself. On Android and iOS the same classes run on the native ThorVG engine through JSI, so the same code draws the same result on every platform.
+Draw with React components, or with the [`@thorvg/webcanvas`](https://www.npmjs.com/package/@thorvg/webcanvas) API. The same code draws the same result on every platform.
 
 ## Requirements
 
 - React Native with the New Architecture
-- Android API 24+ and iOS 15.1+
-- Expo apps need a development build (`npx expo prebuild` or `npx expo run:android|ios`). Expo Go does not include the native module.
+- iOS 15.1+
+- Android API 24+
 
 ## Installation
 
@@ -75,7 +75,7 @@ const Example = () => {
     return () => canvas.destroy();
   }, [TVG]);
 
-  return <Canvas ref={view} style={{ width: 200, height: 160 }} />;
+  return <Canvas ref={view} />;
 };
 ```
 

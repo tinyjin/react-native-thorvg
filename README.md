@@ -6,6 +6,8 @@
 
 [ThorVG](https://github.com/thorvg/thorvg) vector graphics and Lottie for React Native on Android, iOS and web.
 
+> Full documentation [here](https://tinyjin.github.io/react-native-thorvg)
+
 ## Installation
 
 ```sh
@@ -16,7 +18,7 @@ npm install @thorvg/react-native-thorvg
 
 ### Components (Declarative API)
 
-Import the components and render them inside `Canvas`.
+Draw with React components (JSX).
 
 ```tsx
 import { Canvas, Rect } from '@thorvg/react-native-thorvg';
@@ -51,7 +53,7 @@ const Example = () => {
     return () => canvas.destroy();
   }, [TVG]);
 
-  return <Canvas ref={view} style={{ width: 200, height: 160 }} />;
+  return <Canvas ref={view} />;
 }
 ```
 
@@ -84,11 +86,6 @@ import { SvgView } from '@thorvg/react-native-thorvg';
   style={{ width: 120, height: 120 }}
 />
 ```
-
-## Requirements
-
-- React Native with the New Architecture
-- iOS 15.1+, Android API 24+
 
 ## Architecture
 
@@ -125,9 +122,16 @@ useThorVG({ locateFile: (path) => 'https://example.com/path/to/' + path.split('/
 Note: `init()` options `locateFile` and `threads` only apply on web.
 
 ## Development
+
+### Requirements
+
+- React Native with the New Architecture
+- iOS 15.1+
+- Android API 24+
 - Node 24.15+
 - Yarn 4.18+
 
+### Build and Run
 
 ```sh
 git submodule update --init

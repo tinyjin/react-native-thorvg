@@ -3,6 +3,7 @@ import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import type { CanvasViewProps } from '../types';
 import { assignRef } from './assignRef';
 import { CanvasTarget } from './CanvasTarget';
+import { useDefaultSize } from './useDefaultSize';
 
 export function CanvasView({
   ref,
@@ -12,6 +13,7 @@ export function CanvasView({
   ...rest
 }: CanvasViewProps) {
   const [surface] = useState(() => new CanvasTarget(0));
+  const viewStyle = useDefaultSize(surface, style);
 
   useLayoutEffect(() => {
     assignRef(ref, surface);
@@ -35,7 +37,11 @@ export function CanvasView({
   );
 
   return (
-    <View {...rest} style={[styles.container, style]} onLayout={handleLayout}>
+    <View
+      {...rest}
+      style={[styles.container, viewStyle]}
+      onLayout={handleLayout}
+    >
       {createElement('canvas', {
         ref: setElement,
         style: { display: 'block' },

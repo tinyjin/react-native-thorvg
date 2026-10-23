@@ -11,7 +11,7 @@ import {
 const stripes = Array.from({ length: 12 }, (_, i) => i * 50);
 
 const Example = () => (
-  <Canvas width={600} height={600} style={{ width: '100%', aspectRatio: 1 }}>
+  <Canvas width={600} height={600}>
     <Rect x={0} y={0} width={600} height={600} fill="#111827" />
     <Scene>
       {stripes.map((y) => (

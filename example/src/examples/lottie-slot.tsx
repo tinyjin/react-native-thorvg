@@ -1,3 +1,5 @@
+// Native example: LottieSlot.cpp
+
 import { useEffect, useRef } from 'react';
 import {
   Canvas,
@@ -6,10 +8,9 @@ import {
   type Paint,
   type Picture,
 } from '@thorvg/react-native-thorvg';
-import { loadBytes, loadText } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
@@ -17,8 +18,6 @@ const Example = () => {
     const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
     let rafId = 0;
-
-    // Native example: LottieSlot.cpp
 
     const NUM_PER_ROW = 4;
     const NUM_PER_COL = 4;
@@ -40,7 +39,9 @@ const Example = () => {
 
     (async () => {
       //The default font for fallback in case
-      const fontData = await loadBytes('/fonts/PublicSans-Regular.ttf');
+      const fontData = await fetch('/fonts/PublicSans-Regular.ttf')
+        .then((res) => res.arrayBuffer())
+        .then((buffer) => new Uint8Array(buffer));
       if (!active) return;
       TVG.Font.load('PublicSans-Regular', fontData, { type: 'ttf' });
 
@@ -67,16 +68,18 @@ const Example = () => {
           'slot12.json',
           'slot13.json',
           'slot14.json',
-        ].map((file) => loadText('/assets/lottie/extensions/' + file))
+        ].map((file) =>
+          fetch('/assets/lottie/extensions/' + file).then((res) => res.text())
+        )
       );
 
       //The image slot refers to external images, so prefetch them to resolve with.
       const images: Record<string, Uint8Array> = {};
       await Promise.all(
         ['img_0.png', 'logo.png'].map(async (name) => {
-          images[name] = await loadBytes(
-            '/assets/lottie/extensions/images/' + name
-          );
+          images[name] = await fetch('/assets/lottie/extensions/images/' + name)
+            .then((res) => res.arrayBuffer())
+            .then((buffer) => new Uint8Array(buffer));
         })
       );
 
@@ -354,7 +357,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

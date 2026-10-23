@@ -1,9 +1,10 @@
+// Native example: PictureTransform.cpp
+
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG } from '@thorvg/react-native-thorvg';
-import { loadBytes } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
@@ -12,10 +13,10 @@ const Example = () => {
     let active = true;
     let rafId = 0;
 
-    // Native example: PictureTransform.cpp
-
     (async () => {
-      const data = await loadBytes('/assets/images/scale.jpg');
+      const data = await fetch('/assets/images/scale.jpg')
+        .then((res) => res.arrayBuffer())
+        .then((buffer) => new Uint8Array(buffer));
       if (!active) return;
 
       //Original
@@ -56,7 +57,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

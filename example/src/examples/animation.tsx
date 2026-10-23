@@ -1,9 +1,10 @@
+// Native example: Animation.cpp
+
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG } from '@thorvg/react-native-thorvg';
-import { loadBytes, loadText } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
@@ -12,11 +13,11 @@ const Example = () => {
     let active = true;
     let rafId = 0;
 
-    // Native example: Animation.cpp
-
     (async () => {
       //The default font for fallback in case
-      const fontData = await loadBytes('/fonts/PublicSans-Regular.ttf');
+      const fontData = await fetch('/fonts/PublicSans-Regular.ttf')
+        .then((res) => res.arrayBuffer())
+        .then((buffer) => new Uint8Array(buffer));
       if (!active) return;
       TVG.Font.load('PublicSans-Regular', fontData, { type: 'ttf' });
 
@@ -32,7 +33,9 @@ const Example = () => {
 
       canvas.add(shape);
 
-      const data = await loadText('/assets/lottie/sample.json');
+      const data = await fetch('/assets/lottie/sample.json').then((res) =>
+        res.text()
+      );
       if (!active) return;
       animation.load(data);
 
@@ -72,7 +75,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

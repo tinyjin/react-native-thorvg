@@ -1,9 +1,10 @@
+// Native example: Viewport.cpp
+
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG } from '@thorvg/react-native-thorvg';
-import { loadText } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
@@ -11,8 +12,6 @@ const Example = () => {
     const canvas = new TVG.Canvas(canvasRef, { width: 1024, height: 1024 });
     let active = true;
     let rafId = 0;
-
-    // Native example: Viewport.cpp
 
     const VPORT_SIZE = 300;
 
@@ -26,7 +25,9 @@ const Example = () => {
       //Use the opacity for a half-translucent mask.
       mask.opacity(125);
 
-      const data = await loadText('/assets/svg/tiger.svg');
+      const data = await fetch('/assets/svg/tiger.svg').then((res) =>
+        res.text()
+      );
       if (!active) return;
 
       const picture = new TVG.Picture();
@@ -68,7 +69,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

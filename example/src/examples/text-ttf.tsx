@@ -1,17 +1,16 @@
+// Native example: TextTtf.cpp
+
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG } from '@thorvg/react-native-thorvg';
-import { loadBytes } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
     if (!TVG) return;
     const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
-
-    // Native example: TextTtf.cpp
 
     (async () => {
       //Background
@@ -29,7 +28,9 @@ const Example = () => {
       ];
       await Promise.all(
         fonts.map(async (fontName) => {
-          const fontData = await loadBytes(`/fonts/${fontName}.ttf`);
+          const fontData = await fetch(`/fonts/${fontName}.ttf`)
+            .then((res) => res.arrayBuffer())
+            .then((buffer) => new Uint8Array(buffer));
           if (!active) return;
           TVG.Font.load(fontName, fontData, { type: 'ttf' });
         })
@@ -195,7 +196,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

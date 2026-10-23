@@ -1,17 +1,16 @@
+// Native example: PictureWebp.cpp
+
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG } from '@thorvg/react-native-thorvg';
-import { loadBytes } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
     if (!TVG) return;
     const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
-
-    // Native example: PictureWebp.cpp
 
     //Background
     const bg = new TVG.Shape();
@@ -21,7 +20,9 @@ const Example = () => {
 
     //Load webp file
     (async () => {
-      const data = await loadBytes('/assets/images/test.webp');
+      const data = await fetch('/assets/images/test.webp')
+        .then((res) => res.arrayBuffer())
+        .then((buffer) => new Uint8Array(buffer));
       if (!active) return;
 
       for (let i = 0; i < 7; ++i) {
@@ -54,7 +55,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

@@ -1,9 +1,10 @@
+// Native example: Lottie.cpp
+
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG, type Animation } from '@thorvg/react-native-thorvg';
-import { loadBytes, loadText } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
@@ -11,8 +12,6 @@ const Example = () => {
     const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
     let rafId = 0;
-
-    // Native example: Lottie.cpp
 
     const NUM_PER_ROW = 4;
     const NUM_PER_COL = 4;
@@ -38,7 +37,9 @@ const Example = () => {
 
     (async () => {
       //The default font for fallback in case
-      const data = await loadBytes('/fonts/PublicSans-Regular.ttf');
+      const data = await fetch('/fonts/PublicSans-Regular.ttf')
+        .then((res) => res.arrayBuffer())
+        .then((buffer) => new Uint8Array(buffer));
       if (!active) return;
       TVG.Font.load('PublicSans-Regular', data, { type: 'ttf' });
 
@@ -51,7 +52,9 @@ const Example = () => {
       const lottieDataArray = await Promise.all(
         lottieFiles
           .slice(0, NUM_PER_ROW * NUM_PER_COL)
-          .map((file) => loadText('/assets/lottie/' + file))
+          .map((file) =>
+            fetch('/assets/lottie/' + file).then((res) => res.text())
+          )
       );
 
       const animations: Animation[] = [];
@@ -114,7 +117,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

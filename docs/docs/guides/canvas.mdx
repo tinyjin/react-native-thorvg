@@ -5,8 +5,6 @@ sidebar_position: 1
 
 The `Canvas` component renders a native view on Android and iOS and a `<canvas>` element on web. `new TVG.Canvas(view, options)` creates a ThorVG canvas on it.
 
-![react-native-thorvg architecture](/img/architecture.svg)
-
 ```tsx
 const view = useRef<Canvas>(null);
 
@@ -17,7 +15,7 @@ useEffect(() => {
   return () => canvas.destroy();
 }, [TVG]);
 
-return <Canvas ref={view} style={{ width: '100%', aspectRatio: 1 }} />;
+return <Canvas ref={view} />;
 ```
 
 `TVG.Canvas` is the WebCanvas [`Canvas`](https://thorvg.github.io/thorvg.web/classes/Canvas.html) class with the `Canvas` view ref as its target. It has the same methods: `add`, `remove`, `clear`, `update`, `render`, `resize`, `viewport` and `destroy`, plus the `renderer` and `dpr` getters.
@@ -31,13 +29,7 @@ Two sizes are involved, and they are independent.
 | Drawing size | `width` and `height` options of `TVG.Canvas` | The coordinate space you draw in |
 | View size | `style` of the `Canvas` component | How large the canvas appears on screen |
 
-The drawing is scaled to fill the view. Drawing at `600 × 600` and showing it at the screen width keeps the same coordinates on every device:
-
-```tsx
-const canvas = new TVG.Canvas(view, { width: 600, height: 600 });
-
-<Canvas ref={view} style={{ width: '100%', aspectRatio: 1 }} />
-```
+The drawing is scaled to fill the view.
 
 Without `width` and `height`, the drawing size follows the layout size of the view. The canvas is resized and redrawn when the layout changes.
 
@@ -67,7 +59,6 @@ const onTouch = (e: GestureResponderEvent) => {
 return (
   <Canvas
     ref={view}
-    style={{ width: '100%', aspectRatio: 1 }}
     onLayout={(e) => {
       layout.current = e.nativeEvent.layout;
     }}

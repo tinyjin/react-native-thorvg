@@ -1,9 +1,10 @@
+// Native example: SceneEffects.cpp
+
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG, type Scene } from '@thorvg/react-native-thorvg';
-import { loadBytes } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
@@ -12,8 +13,6 @@ const Example = () => {
     let active = true;
     let rafId = 0;
 
-    // Native example: SceneEffects.cpp
-
     const SIZE = 200;
 
     const blur: Scene[] = []; //(for direction both, horizontal, vertical)
@@ -21,7 +20,9 @@ const Example = () => {
 
     //blur scene
     (async () => {
-      const svgData = await loadBytes('/assets/svg/tiger.svg');
+      const svgData = await fetch('/assets/svg/tiger.svg')
+        .then((res) => res.arrayBuffer())
+        .then((buffer) => new Uint8Array(buffer));
       if (!active) return;
 
       for (let i = 0; i < 3; i++) {
@@ -136,9 +137,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return (
-    <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 600 / 400 }} />
-  );
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

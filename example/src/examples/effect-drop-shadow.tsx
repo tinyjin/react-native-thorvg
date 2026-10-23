@@ -1,9 +1,10 @@
+// Native example: EffectDropShadow.cpp
+
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG, type Scene } from '@thorvg/react-native-thorvg';
-import { loadText } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
@@ -11,8 +12,6 @@ const Example = () => {
     const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
     let rafId = 0;
-
-    // Native example: EffectDropShadow.cpp
 
     //background
     const bg = new TVG.Shape();
@@ -28,7 +27,9 @@ const Example = () => {
         scene1 = new TVG.Scene();
 
         const picture = new TVG.Picture();
-        const data = await loadText('/assets/svg/thorvg-logo-clear.svg');
+        const data = await fetch('/assets/svg/thorvg-logo-clear.svg').then(
+          (res) => res.text()
+        );
         if (!active) return;
         picture.load(data, { type: 'svg' });
         picture.scale(0.45);
@@ -44,9 +45,9 @@ const Example = () => {
         scene2 = new TVG.Scene();
 
         const picture = new TVG.Picture();
-        const data = await loadText(
+        const data = await fetch(
           '/assets/svg/152932619-bd3d6921-72df-4f09-856b-f9743ae32a14.svg'
-        );
+        ).then((res) => res.text());
         if (!active) return;
         picture.load(data, { type: 'svg' });
         picture.scale(0.45);
@@ -62,7 +63,9 @@ const Example = () => {
         scene3 = new TVG.Scene();
 
         const picture = new TVG.Picture();
-        const data = await loadText('/assets/svg/circles1.svg');
+        const data = await fetch('/assets/svg/circles1.svg').then((res) =>
+          res.text()
+        );
         if (!active) return;
         picture.load(data, { type: 'svg' });
         picture.scale(0.525);
@@ -115,7 +118,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

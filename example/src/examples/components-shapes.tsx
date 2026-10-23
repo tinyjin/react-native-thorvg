@@ -11,7 +11,7 @@ import {
 } from '@thorvg/react-native-thorvg';
 
 const Example = () => (
-  <Canvas width={600} height={600} style={{ width: '100%', aspectRatio: 1 }}>
+  <Canvas width={600} height={600}>
     <Rect x={0} y={0} width={600} height={600} fill="#1e1e1e" />
     <Rect
       x={40}

@@ -1,3 +1,5 @@
+// Native example: Intersects.cpp
+
 import { useEffect, useRef } from 'react';
 import type { GestureResponderEvent } from 'react-native';
 import {
@@ -7,10 +9,9 @@ import {
   type Shape,
   type Text,
 } from '@thorvg/react-native-thorvg';
-import { loadBytes, loadText } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
   const layout = useRef({ width: 600, height: 600 });
   const pointer = useRef<((x: number, y: number) => void) | null>(null);
@@ -20,8 +21,6 @@ const Example = () => {
     const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
     let rafId = 0;
-
-    // Native example: Intersects.cpp
 
     //Use a scene for selection effect
     let shape: Shape, picture: Picture, text: Text, tiger: Picture;
@@ -60,7 +59,9 @@ const Example = () => {
       //clipped, rotated image
       {
         picture = new TVG.Picture();
-        const data = await loadBytes('/assets/images/test.jpg');
+        const data = await fetch('/assets/images/test.jpg')
+          .then((res) => res.arrayBuffer())
+          .then((buffer) => new Uint8Array(buffer));
         if (!active) return;
         picture.load(data, { type: 'jpg' });
 
@@ -77,7 +78,9 @@ const Example = () => {
 
       //normal text
       {
-        const data = await loadBytes('/fonts/PublicSans-Regular.ttf');
+        const data = await fetch('/fonts/PublicSans-Regular.ttf')
+          .then((res) => res.arrayBuffer())
+          .then((buffer) => new Uint8Array(buffer));
         if (!active) return;
         TVG.Font.load('PublicSans-Regular', data, { type: 'ttf' });
         text = new TVG.Text();
@@ -93,7 +96,9 @@ const Example = () => {
       //vector scene
       {
         tiger = new TVG.Picture();
-        const data = await loadText('/assets/svg/tiger.svg');
+        const data = await fetch('/assets/svg/tiger.svg').then((res) =>
+          res.text()
+        );
         if (!active) return;
         tiger.load(data, { type: 'svg' });
         tiger.translate(350, 320);
@@ -167,7 +172,6 @@ const Example = () => {
   return (
     <Canvas
       ref={canvasRef}
-      style={{ width: '100%', aspectRatio: 1 }}
       onLayout={(e) => {
         layout.current = e.nativeEvent.layout;
       }}

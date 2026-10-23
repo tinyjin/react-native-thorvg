@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SvgView } from '@thorvg/react-native-thorvg';
-import { ASSETS } from './assets';
 
 const badge = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <circle cx="50" cy="50" r="46" fill="#2563eb"/>
@@ -11,7 +10,9 @@ const badge = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
 const Example = () => (
   <View>
     <SvgView
-      source={{ uri: `${ASSETS}/assets/svg/tiger.svg` }}
+      source={{
+        uri: '/assets/svg/tiger.svg',
+      }}
       style={styles.hero}
     />
     <View style={styles.panel}>
@@ -23,7 +24,9 @@ const Example = () => (
       </Tile>
       <Tile label="contentFit cover">
         <SvgView
-          source={{ uri: `${ASSETS}/assets/svg/logo.svg` }}
+          source={{
+            uri: '/assets/svg/logo.svg',
+          }}
           contentFit="cover"
           style={[styles.tile, styles.light]}
         />

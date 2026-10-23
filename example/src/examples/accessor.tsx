@@ -1,9 +1,10 @@
+// Native example: Accessor.cpp
+
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG } from '@thorvg/react-native-thorvg';
-import { loadText } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
@@ -11,12 +12,12 @@ const Example = () => {
     const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
 
-    // Native example: Accessor.cpp
-
     // This example demonstrates two approaches to accessing internal SVG scene nodes.
     (async () => {
       // SVG Picture
-      const svgString = await loadText('/assets/svg/favorite_on.svg');
+      const svgString = await fetch('/assets/svg/favorite_on.svg').then((res) =>
+        res.text()
+      );
       if (!active) return;
 
       const picture = new TVG.Picture();
@@ -58,7 +59,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

@@ -23,7 +23,13 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'WebCanvas API',
       collapsed: false,
-      items: ['guides/canvas', 'guides/animation', 'guides/lottie', 'guides/text'],
+      items: [
+        'guides/overview',
+        'guides/canvas',
+        'guides/animation',
+        'guides/lottie',
+        'guides/text',
+      ],
     },
     {
       type: 'category',

@@ -3,7 +3,46 @@ import type { Canvas } from '@thorvg/webcanvas';
 
 type LayoutListener = (width: number, height: number) => void;
 
+export interface Size {
+  width: number;
+  height: number;
+}
+
 const canvases = new WeakMap<CanvasTarget, Canvas>();
+const sizes = new WeakMap<CanvasTarget, Size>();
+const sizeListeners = new WeakMap<
+  CanvasTarget,
+  Set<(size: Size | null) => void>
+>();
+
+export function drawingSize(target: CanvasTarget): Size | null {
+  return sizes.get(target) ?? null;
+}
+
+export function setDrawingSize(target: CanvasTarget, size: Size | null): void {
+  const current = sizes.get(target);
+  if (current?.width === size?.width && current?.height === size?.height) {
+    return;
+  }
+  if (size) sizes.set(target, size);
+  else sizes.delete(target);
+  for (const listener of sizeListeners.get(target) ?? []) listener(size);
+}
+
+export function subscribeDrawingSize(
+  target: CanvasTarget,
+  listener: (size: Size | null) => void
+): () => void {
+  let listeners = sizeListeners.get(target);
+  if (!listeners) {
+    listeners = new Set();
+    sizeListeners.set(target, listeners);
+  }
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
 
 export function bindCanvas(target: CanvasTarget, canvas: Canvas): void {
   canvases.set(target, canvas);

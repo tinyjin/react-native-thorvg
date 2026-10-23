@@ -1,9 +1,10 @@
+// Native example: Picture.cpp
+
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG } from '@thorvg/react-native-thorvg';
-import { loadBytes, loadText } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
@@ -11,11 +12,11 @@ const Example = () => {
     const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
 
-    // Native example: Picture.cpp
-
     (async () => {
       //The default font for fallback in case
-      const fontData = await loadBytes('/fonts/PublicSans-Regular.ttf');
+      const fontData = await fetch('/fonts/PublicSans-Regular.ttf')
+        .then((res) => res.arrayBuffer())
+        .then((buffer) => new Uint8Array(buffer));
       if (!active) return;
       TVG.Font.load('PublicSans-Regular', fontData, { type: 'ttf' });
 
@@ -28,7 +29,9 @@ const Example = () => {
       const picture = new TVG.Picture();
       picture.origin(0.5, 0.5); //center origin
 
-      const data = await loadText('/assets/svg/logo.svg');
+      const data = await fetch('/assets/svg/logo.svg').then((res) =>
+        res.text()
+      );
       if (!active) return;
       picture.load(data, { type: 'svg' });
 
@@ -49,7 +52,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

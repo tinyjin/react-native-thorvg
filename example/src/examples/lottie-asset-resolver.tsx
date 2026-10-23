@@ -1,9 +1,10 @@
+// Native example: LottieAssetResolver.cpp
+
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG, type Picture } from '@thorvg/react-native-thorvg';
-import { loadBytes, loadText } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
@@ -11,8 +12,6 @@ const Example = () => {
     const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
     let rafId = 0;
-
-    // Native example: LottieAssetResolver.cpp
 
     const NUM_PER_ROW = 2;
     const W = 600,
@@ -41,10 +40,18 @@ const Example = () => {
     (async () => {
       //The resolver callback is synchronous, so prefetch the assets to resolve with.
       const [logo, font, resolver1, resolver2] = await Promise.all([
-        loadBytes('/assets/images/logo.png'),
-        loadBytes('/fonts/SentyCloud.ttf'),
-        loadText('/assets/lottie/extensions/resolver1.json'),
-        loadText('/assets/lottie/extensions/resolver2.json'),
+        fetch('/assets/images/logo.png')
+          .then((res) => res.arrayBuffer())
+          .then((buffer) => new Uint8Array(buffer)),
+        fetch('/fonts/SentyCloud.ttf')
+          .then((res) => res.arrayBuffer())
+          .then((buffer) => new Uint8Array(buffer)),
+        fetch('/assets/lottie/extensions/resolver1.json').then((res) =>
+          res.text()
+        ),
+        fetch('/assets/lottie/extensions/resolver2.json').then((res) =>
+          res.text()
+        ),
       ]);
 
       const animations = [];
@@ -123,7 +130,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

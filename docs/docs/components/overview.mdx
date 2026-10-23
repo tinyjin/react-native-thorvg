@@ -36,20 +36,14 @@ Every paint component also takes the [paint properties](./paint) such as `transl
 
 | Prop | Description |
 | --- | --- |
-| `width`, `height` | Drawing size. Without `style`, also the size of the view. Defaults to the layout size of the view |
+| `width`, `height` | Drawing size. Defaults to the layout size of the view |
 | `enableDevicePixelRatio` | Renders at the device pixel ratio. Default `true` |
 | `engineOption` | `EngineOption` value for the engine |
 | `viewport` | `{ x, y, width, height }` region of the canvas to draw |
 | `androidBackingView` | `'TextureView'` (default) or `'SurfaceView'`. Android only |
 | `ref` | Receives the `Canvas` view. See [Refs](#refs) |
 
-All other `View` props are passed to the view. With `style`, the drawing is scaled to fill the view:
-
-```tsx
-<Canvas width={600} height={600} style={{ width: '100%', aspectRatio: 1 }}>
-  {/* draw in a 600 × 600 space at any screen width */}
-</Canvas>
-```
+All other `View` props are passed to the view.
 
 Without children, `Canvas` is only the view for the [WebCanvas API](../guides/canvas).
 

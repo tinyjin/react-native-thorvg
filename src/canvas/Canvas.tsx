@@ -1,20 +1,9 @@
-import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { DeclarativeCanvas } from '../components/DeclarativeCanvas';
 import type { CanvasProps } from '../types';
 import type { CanvasTarget } from './CanvasTarget';
 import { CanvasView } from './CanvasView';
 
 export type Canvas = CanvasTarget;
-
-function sized(style: StyleProp<ViewStyle>): boolean {
-  const flat = StyleSheet.flatten(style) ?? {};
-  return (
-    flat.width !== undefined ||
-    flat.height !== undefined ||
-    flat.aspectRatio !== undefined ||
-    flat.flex !== undefined
-  );
-}
 
 export function Canvas({
   children,
@@ -32,7 +21,7 @@ export function Canvas({
   return (
     <DeclarativeCanvas
       {...rest}
-      style={sized(style) ? style : [{ width, height }, style]}
+      style={style}
       width={width}
       height={height}
       enableDevicePixelRatio={enableDevicePixelRatio}

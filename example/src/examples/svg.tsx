@@ -1,17 +1,16 @@
+// Native example: Svg.cpp
+
 import { useEffect, useRef } from 'react';
 import { Canvas, useThorVG } from '@thorvg/react-native-thorvg';
-import { loadBytes, loadText } from './assets';
 
 const Example = () => {
-  const TVG = useThorVG({ renderer: 'sw' });
+  const TVG = useThorVG();
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
     if (!TVG) return;
     const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
-
-    // Native example: Svg.cpp
 
     const NUM_PER_ROW = 4;
     const NUM_PER_COL = 4;
@@ -37,7 +36,9 @@ const Example = () => {
 
     (async () => {
       //The default font for fallback in case
-      const fontData = await loadBytes('/fonts/PublicSans-Regular.ttf');
+      const fontData = await fetch('/fonts/PublicSans-Regular.ttf')
+        .then((res) => res.arrayBuffer())
+        .then((buffer) => new Uint8Array(buffer));
       if (!active) return;
       TVG.Font.load('PublicSans-Regular', fontData, { type: 'ttf' });
 
@@ -51,7 +52,11 @@ const Example = () => {
       const svgDataArray = await Promise.all(
         svgFiles
           .slice(0, NUM_PER_ROW * NUM_PER_COL)
-          .map((file) => loadText('/assets/svg/' + encodeURIComponent(file)))
+          .map((file) =>
+            fetch('/assets/svg/' + encodeURIComponent(file)).then((res) =>
+              res.text()
+            )
+          )
       );
 
       const pictures = [];
@@ -95,7 +100,7 @@ const Example = () => {
   }, [TVG]);
 
   if (!TVG) return null;
-  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
+  return <Canvas ref={canvasRef} />;
 };
 
 export default Example;

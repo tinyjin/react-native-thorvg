@@ -9,6 +9,7 @@ import type { Canvas as WebCanvas } from '@thorvg/webcanvas';
 import {
   bindCanvas,
   resolveTarget,
+  setDrawingSize,
   unbindCanvas,
   type CanvasRef,
   type CanvasTarget,
@@ -89,7 +90,9 @@ export class Canvas {
     this.#target = surface;
     bindCanvas(surface, this as unknown as WebCanvas);
 
-    if (width === undefined || height === undefined) {
+    if (width !== undefined && height !== undefined) {
+      setDrawingSize(surface, { width, height });
+    } else {
       this.#unsubscribe = surface.subscribe((w, h) => {
         this.resize(width ?? w, height ?? h).render();
       });
@@ -194,6 +197,9 @@ export class Canvas {
     this.#unsubscribe?.();
     this.#unsubscribe = null;
     if (this.#target) {
+      if (this.#target.canvas === (this as unknown as WebCanvas)) {
+        setDrawingSize(this.#target, null);
+      }
       unbindCanvas(this.#target, this as unknown as WebCanvas);
       this.#target = null;
     }
