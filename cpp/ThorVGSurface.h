@@ -39,6 +39,8 @@ void setScheduler(std::function<void(std::function<void()>)> scheduler);
 void runOnJS(std::function<void()> task);
 std::recursive_mutex& engineMutex();
 
+struct PresentTarget;
+
 class CanvasHost : public std::enable_shared_from_this<CanvasHost> {
  public:
   CanvasHost(int surfaceId, Tvg_Engine_Option option, Renderer renderer);
@@ -63,7 +65,7 @@ class CanvasHost : public std::enable_shared_from_this<CanvasHost> {
   void detach();
 
  private:
-  void presentLocked();
+  void submitLocked();
   bool bindLocked();
   void requestFrameLocked();
   void drawFrame();
@@ -79,6 +81,7 @@ class CanvasHost : public std::enable_shared_from_this<CanvasHost> {
   bool drawn_ = false;
   std::shared_ptr<Surface> surface_;
   std::shared_ptr<Surface> bound_;
+  std::shared_ptr<PresentTarget> present_;
   int surfaceId_;
 };
 

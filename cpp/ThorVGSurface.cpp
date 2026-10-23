@@ -1,6 +1,10 @@
 #include "ThorVGSurface.h"
 
 #include <algorithm>
+#include <atomic>
+#include <condition_variable>
+#include <deque>
+#include <thread>
 
 namespace thorvg::rn {
 
@@ -14,6 +18,82 @@ namespace {
 
 std::mutex gSchedulerMutex;
 std::function<void(std::function<void()>)> gScheduler;
+
+}
+
+// Presents sw frames on the presenter thread. Only the latest pending frame is shown.
+struct PresentTarget {
+  std::mutex mutex;
+  std::shared_ptr<Surface> surface;
+  std::vector<uint32_t> back;
+  std::vector<uint32_t> front;
+  uint32_t width = 0;
+  uint32_t height = 0;
+  uint32_t frontWidth = 0;
+  uint32_t frontHeight = 0;
+  bool dirty = false;
+  bool repaint = false;
+  std::atomic<bool> queued{false};
+
+  void present() {
+    std::shared_ptr<Surface> target;
+    {
+      std::lock_guard<std::mutex> lock(mutex);
+      if (!surface) return;
+      if (dirty) {
+        back.swap(front);
+        frontWidth = width;
+        frontHeight = height;
+        dirty = false;
+      } else if (!repaint || front.empty()) {
+        return;
+      }
+      repaint = false;
+      target = surface;
+    }
+    target->present(front.data(), frontWidth, frontHeight);
+  }
+};
+
+namespace {
+
+class Presenter {
+ public:
+  static Presenter& shared() {
+    static Presenter* presenter = new Presenter();
+    return *presenter;
+  }
+
+  void schedule(const std::shared_ptr<PresentTarget>& target) {
+    if (target->queued.exchange(true)) return;
+    {
+      std::lock_guard<std::mutex> lock(mutex_);
+      queue_.push_back(target);
+    }
+    cv_.notify_one();
+  }
+
+ private:
+  Presenter() {
+    std::thread([this] {
+      while (true) {
+        std::shared_ptr<PresentTarget> target;
+        {
+          std::unique_lock<std::mutex> lock(mutex_);
+          cv_.wait(lock, [this] { return !queue_.empty(); });
+          target = std::move(queue_.front());
+          queue_.pop_front();
+        }
+        target->queued = false;
+        target->present();
+      }
+    }).detach();
+  }
+
+  std::mutex mutex_;
+  std::condition_variable cv_;
+  std::deque<std::shared_ptr<PresentTarget>> queue_;
+};
 
 }
 
@@ -56,7 +136,10 @@ CanvasHost::CanvasHost(int surfaceId, Tvg_Engine_Option option, Renderer rendere
     canvas_ = gpu->create(option);
     if (canvas_) gpu_ = gpu;
   }
-  if (!canvas_) canvas_ = tvg_swcanvas_create(option);
+  if (!canvas_) {
+    canvas_ = tvg_swcanvas_create(option);
+    present_ = std::make_shared<PresentTarget>();
+  }
 }
 
 CanvasHost::~CanvasHost() {
@@ -69,6 +152,10 @@ CanvasHost::~CanvasHost() {
   }
   surface_.reset();
   bound_.reset();
+  if (present_) {
+    std::lock_guard<std::mutex> target(present_->mutex);
+    present_->surface.reset();
+  }
 }
 
 Tvg_Result CanvasHost::resize(uint32_t width, uint32_t height) {
@@ -105,7 +192,7 @@ Tvg_Result CanvasHost::render() {
   auto result = tvg_canvas_draw(canvas_, true);
   tvg_canvas_sync(canvas_);
   drawn_ = true;
-  presentLocked();
+  submitLocked();
   return result;
 }
 
@@ -158,7 +245,12 @@ void CanvasHost::attach(std::shared_ptr<Surface> surface) {
   std::lock_guard<std::mutex> lock(mutex_);
   surface_ = std::move(surface);
   if (!gpu_) {
-    presentLocked();
+    {
+      std::lock_guard<std::mutex> target(present_->mutex);
+      present_->surface = surface_;
+      present_->repaint = true;
+    }
+    Presenter::shared().schedule(present_);
     return;
   }
 
@@ -170,12 +262,21 @@ void CanvasHost::detach() {
   std::lock_guard<std::mutex> lock(mutex_);
   surface_.reset();
   targeted_ = false;
+  if (present_) {
+    std::lock_guard<std::mutex> target(present_->mutex);
+    present_->surface.reset();
+  }
 }
 
-void CanvasHost::presentLocked() {
-  if (surface_ && drawn_ && !buffer_.empty()) {
-    surface_->present(buffer_.data(), width_, height_);
+void CanvasHost::submitLocked() {
+  {
+    std::lock_guard<std::mutex> target(present_->mutex);
+    present_->back.assign(buffer_.begin(), buffer_.end());
+    present_->width = width_;
+    present_->height = height_;
+    present_->dirty = true;
   }
+  Presenter::shared().schedule(present_);
 }
 
 void CanvasHost::requestFrameLocked() {
