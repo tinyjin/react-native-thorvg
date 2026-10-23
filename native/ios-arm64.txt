@@ -1,0 +1,18 @@
+[binaries]
+c = toolchain / 'clang'
+cpp = toolchain / 'clang++'
+ar = toolchain / 'ar'
+strip = toolchain / 'strip'
+
+[built-in options]
+c_args = ['-target', 'arm64-apple-ios' + ios_min, '-isysroot', iphoneos_sdk]
+cpp_args = ['-target', 'arm64-apple-ios' + ios_min, '-isysroot', iphoneos_sdk]
+c_link_args = ['-target', 'arm64-apple-ios' + ios_min, '-isysroot', iphoneos_sdk]
+cpp_link_args = ['-target', 'arm64-apple-ios' + ios_min, '-isysroot', iphoneos_sdk]
+
+[host_machine]
+system = 'darwin'
+subsystem = 'ios'
+cpu_family = 'aarch64'
+cpu = 'aarch64'
+endian = 'little'

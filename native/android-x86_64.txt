@@ -1,0 +1,15 @@
+[binaries]
+c = toolchain / 'x86_64-linux-android' + api + '-clang'
+cpp = toolchain / 'x86_64-linux-android' + api + '-clang++'
+ar = toolchain / 'llvm-ar'
+strip = toolchain / 'llvm-strip'
+
+[built-in options]
+c_args = ['-fPIC', '-ffunction-sections', '-fdata-sections']
+cpp_args = ['-fPIC', '-ffunction-sections', '-fdata-sections']
+
+[host_machine]
+system = 'android'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'
