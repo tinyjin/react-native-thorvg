@@ -54,7 +54,7 @@
   </g>
 
   <g fill="#111" font-size="24">
-    <text x="255" y="117">JavaScript/TypeScript</text>
+    <text x="255" y="117">JSX/JavaScript/TypeScript</text>
     <text x="245" y="389">JSI Binding</text>
     <text x="555" y="389">WebAssembly</text>
   </g>
