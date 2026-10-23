@@ -85,9 +85,7 @@ Canvases render into a `TextureView` by default. Android supports `'gl'` (OpenGL
 
 ## iOS
 
-Run `pod install` in your `ios` directory after installing the package. Canvases render with the software engine and are presented through Metal. GPU rendering (WebGPU) is planned.
-
-Note: The `renderer` option is ignored on iOS.
+Run `pod install` in your `ios` directory after installing the package. iOS supports `'wg'` (WebGPU on Metal, the default) and `'sw'`. Other renderers fall back to `'sw'`.
 
 ## Web
 
@@ -107,6 +105,6 @@ Note: `init()` options `locateFile` and `threads` only apply on web.
 ```sh
 git submodule update --init
 yarn
-yarn build:thorvg            # prebuilt ThorVG into libs/ (needs meson, ninja, Xcode, Android NDK)
+yarn build:thorvg            # prebuilt ThorVG into libs/ (needs meson, ninja, pkg-config, Xcode, Android NDK)
 yarn example ios             # or: yarn example android, yarn example web
 ```

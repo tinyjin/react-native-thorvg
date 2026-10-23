@@ -9,6 +9,7 @@ LIBS="$ROOT/libs"
 
 ANDROID_API=24
 IOS_MIN=15.1
+WGPU_VERSION=v29.0.1.1
 ANDROID_ABIS=(arm64-v8a armeabi-v7a x86_64 x86)
 IOS_SLICES=(ios-arm64 ios-sim-arm64 ios-sim-x86_64)
 TARGET="${1:-all}"
@@ -38,6 +39,7 @@ VERSION="$(git -C "$THORVG" describe --tags --always)"
 
 build_slice() {
   local name="$1" constants="$2" simd="$3" engines="$4" extra="$5"
+  shift 5
   local dir="$BUILD/$name"
 
   rm -rf "$dir"
@@ -50,7 +52,7 @@ build_slice() {
     "${MESON_OPTIONS[@]}" \
     -Dengines="$engines" \
     -Dextra="$extra" \
-    -Dsimd="$simd" > "$dir/setup.log"
+    -Dsimd="$simd" "$@" > "$dir/setup.log"
   ninja -C "$dir/build" > "$dir/ninja.log"
 
   cp "$dir/build/src/libthorvg-1.a" "$dir/libthorvg.a"
@@ -88,6 +90,26 @@ api = '$ANDROID_API'" "$simd" cpu,gl lottie_exp,opengl_es
   echo "$VERSION" > "$LIBS/android/VERSION"
 }
 
+fetch_wgpu() {
+  local slice="$1" arch="$2"
+  local dir="$BUILD/wgpu/$slice"
+  if [ ! -f "$dir/lib/libwgpu_native.a" ]; then
+    rm -rf "$dir"
+    mkdir -p "$dir"
+    curl -sSfL -o "$dir.zip" \
+      "https://github.com/gfx-rs/wgpu-native/releases/download/$WGPU_VERSION/wgpu-ios-$arch-release.zip"
+    unzip -q "$dir.zip" -d "$dir"
+    rm "$dir.zip"
+  fi
+  cat > "$dir/wgpu_native.pc" <<EOF
+Name: wgpu_native
+Description: wgpu-native
+Version: ${WGPU_VERSION#v}
+Cflags: -I$dir/include
+Libs: -L$dir/lib -lwgpu_native
+EOF
+}
+
 build_ios() {
   local toolchain iphoneos simulator
   toolchain="$(dirname "$(xcrun -f clang)")"
@@ -95,15 +117,21 @@ build_ios() {
   simulator="$(xcrun --sdk iphonesimulator --show-sdk-path)"
 
   for slice in "${IOS_SLICES[@]}"; do
-    local simd=true
+    local simd=true arch=aarch64
     case "$slice" in *x86_64) simd=false ;; esac
+    case "$slice" in
+      ios-sim-arm64) arch=aarch64-simulator ;;
+      ios-sim-x86_64) arch=x86_64-simulator ;;
+    esac
     echo "  building $slice"
+    fetch_wgpu "$slice" "$arch"
     build_slice "$slice" "[constants]
 toolchain = '$toolchain'
 ios_min = '$IOS_MIN'
 iphoneos_sdk = '$iphoneos'
-simulator_sdk = '$simulator'" "$simd" cpu lottie_exp
+simulator_sdk = '$simulator'" "$simd" cpu,wg lottie_exp -Dpkg_config_path="$BUILD/wgpu/$slice"
     strip -S "$BUILD/$slice/libthorvg.a" 2>/dev/null
+    libtool -static -o "$BUILD/$slice/libthorvg.a" "$BUILD/$slice/libthorvg.a" "$BUILD/wgpu/$slice/lib/libwgpu_native.a" 2>/dev/null
   done
 
   local stage="$BUILD/ios-stage"
@@ -112,6 +140,7 @@ simulator_sdk = '$simulator'" "$simd" cpu lottie_exp
   cp "$BUILD/ios-arm64/libthorvg.a" "$stage/device/"
   lipo -create "$BUILD/ios-sim-arm64/libthorvg.a" "$BUILD/ios-sim-x86_64/libthorvg.a" -output "$stage/simulator/libthorvg.a"
   copy_headers "$stage/include"
+  cp -R "$BUILD/wgpu/ios-arm64/include/webgpu" "$stage/include/"
 
   rm -rf "$LIBS/ios"
   mkdir -p "$LIBS/ios"

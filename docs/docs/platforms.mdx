@@ -11,9 +11,9 @@ Android supports `'gl'` (OpenGL ES, the default) and `'sw'`. Other renderers fal
 
 ## iOS
 
-Run `pod install` in your `ios` directory after installing the package. Canvases render with the software engine and are presented through Metal. GPU rendering (WebGPU) is planned.
+Run `pod install` in your `ios` directory after installing the package.
 
-The `renderer` option is ignored on iOS.
+iOS supports `'wg'` (WebGPU on Metal, the default) and `'sw'`. Other renderers fall back to `'sw'`.
 
 ## Web
 

@@ -167,6 +167,7 @@ jobs:
         if: env.turbo_cache_hit != 1
         run: |
           pip3 install --break-system-packages meson ninja
+          command -v pkg-config || brew install pkgconf
           yarn build:thorvg ios
 
       - name: Prebuild expo app for iOS

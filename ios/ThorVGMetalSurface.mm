@@ -1,6 +1,7 @@
 #import "ThorVGMetalSurface.h"
 
 #import <Metal/Metal.h>
+#import <webgpu/webgpu.h>
 
 #include <algorithm>
 #include <array>
@@ -12,12 +13,100 @@ namespace {
 
 constexpr size_t kFramesInFlight = 3;
 
+class WgGpu final : public Gpu {
+ public:
+  static WgGpu *shared()
+  {
+    static WgGpu *gpu = [] {
+      auto *instance = new WgGpu();
+      if (instance->init()) return instance;
+      delete instance;
+      return static_cast<WgGpu *>(nullptr);
+    }();
+    return gpu;
+  }
+
+  Renderer renderer() const override { return Renderer::Wg; }
+
+  Tvg_Canvas create(Tvg_Engine_Option option) override { return tvg_wgcanvas_create(option); }
+
+  void bind(Surface *) override {}
+
+  WGPUSurface createSurface(CAMetalLayer *layer)
+  {
+    WGPUSurfaceSourceMetalLayer source = {};
+    source.chain.sType = WGPUSType_SurfaceSourceMetalLayer;
+    source.layer = (__bridge void *)layer;
+    WGPUSurfaceDescriptor descriptor = {};
+    descriptor.nextInChain = &source.chain;
+    return wgpuInstanceCreateSurface(instance_, &descriptor);
+  }
+
+  Tvg_WgContext context() const { return {instance_, adapter_, device_}; }
+
+ private:
+  bool init()
+  {
+    instance_ = wgpuCreateInstance(nullptr);
+    if (!instance_) return false;
+
+    WGPURequestAdapterOptions adapterOptions = {};
+    adapterOptions.powerPreference = WGPUPowerPreference_HighPerformance;
+    WGPURequestAdapterCallbackInfo adapterCallback = {};
+    adapterCallback.mode = WGPUCallbackMode_AllowSpontaneous;
+    adapterCallback.callback = [](WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView, void *out, void *) {
+      if (status == WGPURequestAdapterStatus_Success) *static_cast<WGPUAdapter *>(out) = adapter;
+    };
+    adapterCallback.userdata1 = &adapter_;
+    wgpuInstanceRequestAdapter(instance_, &adapterOptions, adapterCallback);
+    if (!adapter_) return false;
+
+    WGPUDeviceDescriptor deviceDescriptor = {};
+    deviceDescriptor.uncapturedErrorCallbackInfo.callback = [](WGPUDevice const *, WGPUErrorType, WGPUStringView message,
+                                                               void *, void *) {
+      NSLog(@"[ThorVG] WebGPU error: %.*s", static_cast<int>(message.length), message.data);
+    };
+    WGPURequestDeviceCallbackInfo deviceCallback = {};
+    deviceCallback.mode = WGPUCallbackMode_AllowSpontaneous;
+    deviceCallback.callback = [](WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView, void *out, void *) {
+      if (status == WGPURequestDeviceStatus_Success) *static_cast<WGPUDevice *>(out) = device;
+    };
+    deviceCallback.userdata1 = &device_;
+    wgpuAdapterRequestDevice(adapter_, &deviceDescriptor, deviceCallback);
+    return device_ != nullptr;
+  }
+
+  WGPUInstance instance_ = nullptr;
+  WGPUAdapter adapter_ = nullptr;
+  WGPUDevice device_ = nullptr;
+};
+
 class MetalSurface final : public Surface {
  public:
   explicit MetalSurface(CAMetalLayer *layer)
       : layer_(layer),
         queue_([layer.device newCommandQueue]),
         inflight_(dispatch_semaphore_create(kFramesInFlight)) {}
+
+  ~MetalSurface() override
+  {
+    if (wgSurface_) wgpuSurfaceRelease(wgSurface_);
+  }
+
+  Tvg_Result target(Tvg_Canvas canvas, uint32_t width, uint32_t height) override
+  {
+    auto *gpu = WgGpu::shared();
+    if (!gpu) return TVG_RESULT_NOT_SUPPORTED;
+    if (!wgSurface_) wgSurface_ = gpu->createSurface(layer_);
+    if (!wgSurface_) return TVG_RESULT_INSUFFICIENT_CONDITION;
+    auto context = gpu->context();
+    return tvg_wgcanvas_set_target_with_context(canvas, &context, wgSurface_, width, height, TVG_COLORSPACE_ABGR8888, 0);
+  }
+
+  void swap() override
+  {
+    if (wgSurface_) wgpuSurfacePresent(wgSurface_);
+  }
 
   void present(const uint32_t *pixels, uint32_t width, uint32_t height) override
   {
@@ -80,13 +169,14 @@ class MetalSurface final : public Surface {
   dispatch_semaphore_t inflight_;
   std::array<id<MTLBuffer>, kFramesInFlight> buffers_{};
   size_t index_ = 0;
+  WGPUSurface wgSurface_ = nullptr;
 };
 
 }
 
 Gpu *platformGpu()
 {
-  return nullptr;
+  return WgGpu::shared();
 }
 
 std::shared_ptr<Surface> makeMetalSurface(CAMetalLayer *layer)

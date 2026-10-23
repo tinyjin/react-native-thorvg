@@ -3,6 +3,7 @@ c = toolchain / 'clang'
 cpp = toolchain / 'clang++'
 ar = toolchain / 'ar'
 strip = toolchain / 'strip'
+pkg-config = 'pkg-config'
 
 [built-in options]
 c_args = ['-target', 'x86_64-apple-ios' + ios_min + '-simulator', '-isysroot', simulator_sdk]
