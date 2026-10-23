@@ -3,9 +3,11 @@ title: Clip and mask
 sidebar_position: 6
 ---
 
+import LiveExample from '@site/src/components/LiveExample';
+
 `Clip` and `Mask` are children of a paint and hold one paint. `Clip` calls `clip()` and `Mask` calls `mask()` on the parent with that paint.
 
-![Clip and mask](/img/components/masking.png)
+<LiveExample id="components-masking" />
 
 ```tsx
 import {
