@@ -2,6 +2,8 @@
 
 #include <jsi/jsi.h>
 
+#include <functional>
+
 #include "thorvg_capi.h"
 
 namespace thorvg::rn {
@@ -27,6 +29,9 @@ class Handle : public jsi::NativeState {
   Kind kind_;
   bool owned_;
 };
+
+void deferRelease(std::function<void()> release);
+void drainReleases();
 
 jsi::Value makeHandle(jsi::Runtime& rt, void* ptr, Handle::Kind kind, bool owned);
 Handle* findHandle(jsi::Runtime& rt, const jsi::Value& value);

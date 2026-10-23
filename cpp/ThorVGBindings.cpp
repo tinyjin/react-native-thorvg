@@ -146,7 +146,10 @@ jsi::Array floatArray(jsi::Runtime& rt, const float* values, size_t count) {
 class CanvasState : public jsi::NativeState {
  public:
   explicit CanvasState(std::shared_ptr<CanvasHost> host) : host_(std::move(host)) {}
-  ~CanvasState() override { destroy(); }
+  ~CanvasState() override {
+    if (!host_) return;
+    deferRelease([host = std::move(host_)] { SurfaceRegistry::shared().unbindCanvas(host->surfaceId(), host.get()); });
+  }
 
   CanvasHost* host() const { return host_.get(); }
 
@@ -250,9 +253,14 @@ class Builder {
   Builder(jsi::Runtime& rt, jsi::Object& target) : rt_(rt), target_(target) {}
 
   void fn(const char* name, unsigned int argc, jsi::HostFunctionType body) {
-    target_.setProperty(rt_, name,
-                        jsi::Function::createFromHostFunction(rt_, jsi::PropNameID::forAscii(rt_, name), argc,
-                                                              std::move(body)));
+    target_.setProperty(
+        rt_, name,
+        jsi::Function::createFromHostFunction(
+            rt_, jsi::PropNameID::forAscii(rt_, name), argc,
+            [body = std::move(body)](jsi::Runtime& rt, const jsi::Value& self, const jsi::Value* args, size_t count) {
+              drainReleases();
+              return body(rt, self, args, count);
+            }));
   }
 
   template <typename R, typename... A>
