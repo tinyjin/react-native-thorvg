@@ -38,7 +38,7 @@ Initializes ThorVG outside of React. `init()` and `useThorVG()` share one initia
 
 ## `ThorVG`
 
-The namespace returned by `init()` and `useThorVG()`. It is the WebCanvas namespace with `Canvas` replaced by a component and without `Video`.
+The namespace returned by `init()` and `useThorVG()`. It is the WebCanvas namespace without `Video`. `TVG.Canvas` takes the [`Canvas`](#canvas) view as its target.
 
 | Member | Reference |
 | --- | --- |
@@ -51,21 +51,38 @@ The namespace returned by `init()` and `useThorVG()`. It is the WebCanvas namesp
 | `version` | ThorVG engine version |
 | `term()` | Resets the initialization |
 
-## `TVG.Canvas`
+## `Canvas`
 
 ```tsx
-<TVG.Canvas ref={canvas} width={600} height={600} style={{ width: '100%', aspectRatio: 1 }} />
+import { Canvas } from '@thorvg/react-native-thorvg';
+
+<Canvas ref={view} style={{ width: '100%', aspectRatio: 1 }} />
 ```
+
+The view a `TVG.Canvas` draws into.
 
 | Prop | Description |
 | --- | --- |
-| `ref` | Receives the [`Canvas`](https://thorvg.github.io/thorvg.web/classes/Canvas.html) instance |
-| `width`, `height` | Drawing size. Defaults to the layout size of the view |
-| `enableDevicePixelRatio` | Renders at the device pixel ratio. Default `true` |
-| `engineOption` | `TVG.EngineOption` value for the engine |
+| `ref` | Receives the view to pass to `TVG.Canvas`. Its type is `Canvas` |
 | `androidBackingView` | `'TextureView'` (default) or `'SurfaceView'`. Android only |
 
-All other `View` props, such as `style`, `onLayout` and the responder props, are passed to the view. See [Canvas](./guides/canvas) for sizing and lifecycle.
+All other `View` props, such as `style`, `onLayout` and the responder props, are passed to the view.
+
+## `TVG.Canvas`
+
+```ts
+const canvas = new TVG.Canvas(view, { width: 600, height: 600 });
+```
+
+The WebCanvas [`Canvas`](https://thorvg.github.io/thorvg.web/classes/Canvas.html) class. The target is the `Canvas` view ref. On web it also accepts a selector, an `HTMLCanvasElement` or an `OffscreenCanvas`, as in WebCanvas.
+
+| Option | Description |
+| --- | --- |
+| `width`, `height` | Drawing size. Defaults to the layout size of the view and follows it |
+| `enableDevicePixelRatio` | Renders at the device pixel ratio. Default `true` |
+| `engineOption` | `TVG.EngineOption` value for the engine |
+
+Call `destroy()` when the canvas is no longer used. See [Canvas](./guides/canvas) for sizing and lifecycle.
 
 ## Errors
 

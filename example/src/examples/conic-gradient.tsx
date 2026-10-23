@@ -1,9 +1,5 @@
 import { useEffect, useRef } from 'react';
-import {
-  useThorVG,
-  type Canvas,
-  type ColorStop,
-} from '@thorvg/react-native-thorvg';
+import { Canvas, useThorVG, type ColorStop } from '@thorvg/react-native-thorvg';
 
 const Example = () => {
   const TVG = useThorVG({ renderer: 'sw' });
@@ -11,8 +7,8 @@ const Example = () => {
   const rotate = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!TVG || !canvas) return;
+    if (!TVG) return;
+    const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
 
     // Native example: ConicGradient.cpp
 
@@ -97,15 +93,14 @@ const Example = () => {
 
     return () => {
       rotate.current = null;
+      canvas.destroy();
     };
   }, [TVG]);
 
   if (!TVG) return null;
   return (
-    <TVG.Canvas
+    <Canvas
       ref={canvasRef}
-      width={600}
-      height={600}
       style={{ width: '100%', aspectRatio: 1 }}
       onStartShouldSetResponder={() => true}
       onResponderTerminationRequest={() => false}

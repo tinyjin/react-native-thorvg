@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import {
+  Canvas,
   useThorVG,
-  type Canvas,
   type Picture,
   type Scene,
   type Shape,
@@ -14,8 +14,8 @@ const Example = () => {
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!TVG || !canvas) return;
+    if (!TVG) return;
+    const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
 
     // Native example: Duplicate.cpp
@@ -147,18 +147,12 @@ const Example = () => {
 
     return () => {
       active = false;
+      canvas.destroy();
     };
   }, [TVG]);
 
   if (!TVG) return null;
-  return (
-    <TVG.Canvas
-      ref={canvasRef}
-      width={600}
-      height={600}
-      style={{ width: '100%', aspectRatio: 1 }}
-    />
-  );
+  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
 };
 
 export default Example;

@@ -5,6 +5,11 @@ import { Scene } from './Scene';
 import { checkResult, handleError } from '../errors';
 import { EngineOption } from '../generated/constants';
 import { getJSI, type CanvasHandle } from '../jsi';
+import {
+  resolveTarget,
+  type CanvasRef,
+  type CanvasTarget,
+} from '../../components/CanvasTarget';
 
 type Renderer = NonNullable<InitOptions['renderer']>;
 
@@ -23,27 +28,34 @@ export class Canvas {
   #handle: CanvasHandle | null = null;
   #renderer: Renderer = 'sw';
   #mainScene: Scene | null = null;
-  #enableDevicePixelRatio: boolean;
-  #logicalWidth: number;
-  #logicalHeight: number;
+  #enableDevicePixelRatio: boolean = true;
+  #logicalWidth: number = 1;
+  #logicalHeight: number = 1;
   #currentDPR: number = 1;
   #needsUpdate: boolean = false;
+  #unsubscribe: (() => void) | null = null;
 
-  constructor(surfaceId: number, options: CanvasOptions = {}) {
+  constructor(target: CanvasTarget | CanvasRef, options: CanvasOptions = {}) {
+    const surface = resolveTarget(target);
+    if (!surface) {
+      handleError('The Canvas view is not mounted', 'Canvas constructor');
+      return;
+    }
+
     const {
-      width = 800,
-      height = 600,
+      width,
+      height,
       enableDevicePixelRatio = true,
       engineOption = EngineOption.Default,
     } = options;
 
-    this.#logicalWidth = width;
-    this.#logicalHeight = height;
+    this.#logicalWidth = width ?? Math.max(1, surface.width);
+    this.#logicalHeight = height ?? Math.max(1, surface.height);
     this.#enableDevicePixelRatio = enableDevicePixelRatio;
 
     const jsi = getJSI();
     const handle = jsi.canvas_create(
-      surfaceId,
+      surface.surfaceId,
       engineOption,
       preferredRenderer
     );
@@ -69,6 +81,12 @@ export class Canvas {
       'add main scene'
     );
     jsi.tvg_paint_ref(this.#mainScene.handle);
+
+    if (width === undefined || height === undefined) {
+      this.#unsubscribe = surface.subscribe((w, h) => {
+        this.resize(width ?? w, height ?? h).render();
+      });
+    }
   }
 
   public add(paint: Paint): this {
@@ -166,6 +184,8 @@ export class Canvas {
   }
 
   public destroy(): void {
+    this.#unsubscribe?.();
+    this.#unsubscribe = null;
     if (this.#mainScene) {
       this.#mainScene.clear();
       this.#mainScene.dispose();

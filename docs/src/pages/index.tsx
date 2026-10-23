@@ -5,22 +5,24 @@ import Layout from '@theme/Layout';
 import styles from './index.module.css';
 
 const snippet = `import { useEffect, useRef } from 'react';
-import { useThorVG, type Canvas } from '@thorvg/react-native-thorvg';
+import { Canvas, useThorVG } from '@thorvg/react-native-thorvg';
 
 const Example = () => {
   const TVG = useThorVG({ renderer: 'sw' });
-  const canvas = useRef<Canvas>(null);
+  const view = useRef<Canvas>(null);
 
   useEffect(() => {
-    if (!TVG || !canvas.current) return;
+    if (!TVG) return;
+    const canvas = new TVG.Canvas(view, { width: 200, height: 160 });
 
     const shape = new TVG.Shape();
     shape.appendRect(20, 20, 160, 120, { rx: 16, ry: 16 }).fill(37, 99, 235, 255);
-    canvas.current.add(shape).render();
+    canvas.add(shape).render();
+
+    return () => canvas.destroy();
   }, [TVG]);
 
-  if (!TVG) return null;
-  return <TVG.Canvas ref={canvas} style={{ width: 200, height: 160 }} />;
+  return <Canvas ref={view} style={{ width: 200, height: 160 }} />;
 };`;
 
 const features = [

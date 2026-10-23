@@ -1,9 +1,5 @@
 import { useEffect, useRef } from 'react';
-import {
-  useThorVG,
-  type Canvas,
-  type Paint,
-} from '@thorvg/react-native-thorvg';
+import { Canvas, useThorVG, type Paint } from '@thorvg/react-native-thorvg';
 import { loadBytes, loadText } from './assets';
 
 const Example = () => {
@@ -11,13 +7,13 @@ const Example = () => {
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!TVG || !canvas) return;
+    if (!TVG) return;
+    const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
 
     // Native example: BoundingBox.cpp
 
-    const bbox = (canvas: Canvas, paint: Paint) => {
+    const bbox = (paint: Paint) => {
       //aabb
       {
         let { x, y, width: w, height: h } = paint.bounds();
@@ -61,7 +57,7 @@ const Example = () => {
         shape.appendCircle(33.33, 66.67, 26.67, 66.67);
         shape.fill(0, 30, 255);
         canvas.add(shape);
-        bbox(canvas, shape);
+        bbox(shape);
       }
 
       {
@@ -76,7 +72,7 @@ const Example = () => {
         text.translate(66.67, 13.33);
         text.rotate(16);
         canvas.add(text);
-        bbox(canvas, text);
+        bbox(text);
       }
 
       {
@@ -85,7 +81,7 @@ const Example = () => {
         shape.fill(200, 150, 55);
         shape.rotate(30);
         canvas.add(shape);
-        bbox(canvas, shape);
+        bbox(shape);
       }
 
       {
@@ -109,7 +105,7 @@ const Example = () => {
         shape.transform(m);
 
         canvas.add(shape);
-        bbox(canvas, shape);
+        bbox(shape);
       }
 
       {
@@ -120,7 +116,7 @@ const Example = () => {
         svg.scale(0.2);
         svg.translate(413.33, 33.33);
         canvas.add(svg);
-        bbox(canvas, svg);
+        bbox(svg);
       }
 
       {
@@ -132,7 +128,7 @@ const Example = () => {
         svg.translate(93.33, 143.33);
         svg.rotate(45);
         canvas.add(svg);
-        bbox(canvas, svg);
+        bbox(svg);
       }
 
       {
@@ -147,7 +143,7 @@ const Example = () => {
         scene.add(img);
 
         canvas.add(scene);
-        bbox(canvas, scene);
+        bbox(scene);
       }
 
       {
@@ -163,7 +159,7 @@ const Example = () => {
         scene.add(img);
 
         canvas.add(scene);
-        bbox(canvas, scene);
+        bbox(scene);
       }
 
       {
@@ -172,7 +168,7 @@ const Example = () => {
         line.lineTo(513.33, 233.33);
         line.stroke({ width: 13.33, color: [55, 55, 0, 255] });
         canvas.add(line);
-        bbox(canvas, line);
+        bbox(line);
       }
 
       {
@@ -182,7 +178,7 @@ const Example = () => {
         curve.translate(33.33, 513.33);
         curve.stroke({ width: 1.33, color: [255, 255, 255, 255] });
         canvas.add(curve);
-        bbox(canvas, curve);
+        bbox(curve);
       }
 
       {
@@ -193,7 +189,7 @@ const Example = () => {
         curve.rotate(20);
         curve.stroke({ width: 1.33, color: [255, 0, 255, 255] });
         canvas.add(curve);
-        bbox(canvas, curve);
+        bbox(curve);
       }
 
       {
@@ -211,7 +207,7 @@ const Example = () => {
         scene.add(shape);
 
         canvas.add(scene);
-        bbox(canvas, scene);
+        bbox(scene);
       }
 
       {
@@ -235,7 +231,7 @@ const Example = () => {
         scene.add(shape);
 
         canvas.add(scene);
-        bbox(canvas, scene);
+        bbox(scene);
       }
 
       {
@@ -256,7 +252,7 @@ const Example = () => {
         scene.add(shape);
 
         canvas.add(scene);
-        bbox(canvas, scene);
+        bbox(scene);
       }
 
       {
@@ -293,7 +289,7 @@ const Example = () => {
         scene.add(shape);
 
         canvas.add(scene);
-        bbox(canvas, scene);
+        bbox(scene);
       }
 
       {
@@ -311,7 +307,7 @@ const Example = () => {
         scene.add(text);
 
         canvas.add(scene);
-        bbox(canvas, scene);
+        bbox(scene);
       }
 
       canvas.render();
@@ -319,18 +315,12 @@ const Example = () => {
 
     return () => {
       active = false;
+      canvas.destroy();
     };
   }, [TVG]);
 
   if (!TVG) return null;
-  return (
-    <TVG.Canvas
-      ref={canvasRef}
-      width={600}
-      height={600}
-      style={{ width: '100%', aspectRatio: 1 }}
-    />
-  );
+  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
 };
 
 export default Example;

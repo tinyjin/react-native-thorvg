@@ -1,68 +1,45 @@
-import { createElement, useLayoutEffect, useRef } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Canvas as WebCanvas } from '@thorvg/webcanvas';
+import { createElement, useCallback, useLayoutEffect, useState } from 'react';
+import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import type { CanvasProps } from '../types';
 import { assignRef } from './assignRef';
-import { useCanvasSize } from './useCanvasSize';
+import { CanvasTarget } from './CanvasTarget';
 
-type CanvasElement = ConstructorParameters<typeof WebCanvas>[0];
-
-function fit(element: CanvasElement | null): void {
-  const style = (element as { style?: Record<string, string> } | null)?.style;
-  if (!style) return;
-  style.width = '100%';
-  style.height = '100%';
-}
+export type Canvas = CanvasTarget;
 
 export function Canvas({
   ref,
-  width,
-  height,
-  enableDevicePixelRatio,
-  engineOption,
   androidBackingView: _androidBackingView,
   onLayout,
   style,
   ...rest
 }: CanvasProps) {
-  const [size, handleLayout] = useCanvasSize(width, height, onLayout);
-  const elementRef = useRef<CanvasElement | null>(null);
-  const canvasRef = useRef<WebCanvas | null>(null);
-  const latest = useRef({ ref, size });
-  latest.current = { ref, size };
+  const [surface] = useState(() => new CanvasTarget(0));
 
   useLayoutEffect(() => {
-    const element = elementRef.current;
-    if (!element) return;
-    const { ref: target, size: initial } = latest.current;
-    const canvas = new WebCanvas(element, {
-      width: Math.max(1, initial.width),
-      height: Math.max(1, initial.height),
-      enableDevicePixelRatio,
-      engineOption,
-    });
-    fit(element);
-    canvasRef.current = canvas;
-    assignRef(target, canvas);
-    return () => {
-      assignRef(target, null);
-      canvas.destroy();
-      if (canvasRef.current === canvas) canvasRef.current = null;
-    };
-  }, [enableDevicePixelRatio, engineOption]);
+    assignRef(ref, surface);
+    return () => assignRef(ref, null);
+  }, [ref, surface]);
 
-  useLayoutEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || size.width <= 0 || size.height <= 0) return;
-    canvas.resize(size.width, size.height);
-    fit(elementRef.current);
-    canvas.render();
-  }, [size.width, size.height]);
+  const handleLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      const { width, height } = event.nativeEvent.layout;
+      surface.layout(width, height);
+      onLayout?.(event);
+    },
+    [surface, onLayout]
+  );
+
+  const setElement = useCallback(
+    (element: unknown) => {
+      surface.element = element;
+    },
+    [surface]
+  );
 
   return (
     <View {...rest} style={[styles.container, style]} onLayout={handleLayout}>
       {createElement('canvas', {
-        ref: elementRef,
+        ref: setElement,
         style: { display: 'block' },
       })}
     </View>

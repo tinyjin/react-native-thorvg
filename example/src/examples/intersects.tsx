@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import type { GestureResponderEvent } from 'react-native';
 import {
+  Canvas,
   useThorVG,
-  type Canvas,
   type Picture,
   type Shape,
   type Text,
@@ -16,8 +16,8 @@ const Example = () => {
   const pointer = useRef<((x: number, y: number) => void) | null>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!TVG || !canvas) return;
+    if (!TVG) return;
+    const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
     let active = true;
     let rafId = 0;
 
@@ -151,6 +151,7 @@ const Example = () => {
       active = false;
       cancelAnimationFrame(rafId);
       pointer.current = null;
+      canvas.destroy();
     };
   }, [TVG]);
 
@@ -164,10 +165,8 @@ const Example = () => {
 
   if (!TVG) return null;
   return (
-    <TVG.Canvas
+    <Canvas
       ref={canvasRef}
-      width={600}
-      height={600}
       style={{ width: '100%', aspectRatio: 1 }}
       onLayout={(e) => {
         layout.current = e.nativeEvent.layout;

@@ -1,23 +1,26 @@
-import type { ReactElement, Ref } from 'react';
+import type { Ref } from 'react';
 import type { ViewProps } from 'react-native';
 import type {
   Canvas,
   CanvasOptions,
+  CanvasTarget as WebCanvasTarget,
   InitOptions as WebCanvasInitOptions,
   ThorVGNamespace,
 } from '@thorvg/webcanvas';
+import type { CanvasRef, CanvasTarget } from './components/CanvasTarget';
 
 export type AndroidBackingView = 'TextureView' | 'SurfaceView';
 
-export interface CanvasProps extends CanvasOptions, ViewProps {
-  ref?: Ref<Canvas>;
+export interface CanvasProps extends ViewProps {
+  ref?: Ref<CanvasTarget>;
   androidBackingView?: AndroidBackingView;
 }
 
-export type CanvasComponent = (props: CanvasProps) => ReactElement | null;
-
 export type ThorVG = Omit<ThorVGNamespace, 'Canvas' | 'Video'> & {
-  Canvas: CanvasComponent;
+  Canvas: new (
+    target: CanvasRef | CanvasTarget | string | WebCanvasTarget,
+    options?: CanvasOptions
+  ) => Canvas;
 };
 
 export type InitOptions = WebCanvasInitOptions;

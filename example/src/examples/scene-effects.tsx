@@ -1,9 +1,5 @@
 import { useEffect, useRef } from 'react';
-import {
-  useThorVG,
-  type Canvas,
-  type Scene,
-} from '@thorvg/react-native-thorvg';
+import { Canvas, useThorVG, type Scene } from '@thorvg/react-native-thorvg';
 import { loadBytes } from './assets';
 
 const Example = () => {
@@ -11,8 +7,8 @@ const Example = () => {
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!TVG || !canvas) return;
+    if (!TVG) return;
+    const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 400 });
     let active = true;
     let rafId = 0;
 
@@ -135,17 +131,13 @@ const Example = () => {
     return () => {
       active = false;
       cancelAnimationFrame(rafId);
+      canvas.destroy();
     };
   }, [TVG]);
 
   if (!TVG) return null;
   return (
-    <TVG.Canvas
-      ref={canvasRef}
-      width={600}
-      height={400}
-      style={{ width: '100%', aspectRatio: 600 / 400 }}
-    />
+    <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 600 / 400 }} />
   );
 };
 

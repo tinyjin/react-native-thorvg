@@ -1,10 +1,11 @@
+export { Canvas } from './components/Canvas';
+export type { CanvasTarget } from './components/CanvasTarget';
 export { init } from './init';
 export { useThorVG } from './useThorVG';
 export { ThorVGError, ThorVGResultCode } from './platform';
 
 export type {
   AndroidBackingView,
-  CanvasComponent,
   CanvasProps,
   InitOptions,
   ThorVG,
@@ -19,7 +20,6 @@ export type {
   AudioInfo,
   AudioResolver,
   Bounds,
-  Canvas,
   CanvasOptions,
   ColorStop,
   ConicGradient,

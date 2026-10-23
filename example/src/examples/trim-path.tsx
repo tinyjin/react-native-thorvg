@@ -1,17 +1,13 @@
 import { useEffect, useRef } from 'react';
-import {
-  useThorVG,
-  type Canvas,
-  type Shape,
-} from '@thorvg/react-native-thorvg';
+import { Canvas, useThorVG, type Shape } from '@thorvg/react-native-thorvg';
 
 const Example = () => {
   const TVG = useThorVG({ renderer: 'sw' });
   const canvasRef = useRef<Canvas>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!TVG || !canvas) return;
+    if (!TVG) return;
+    const canvas = new TVG.Canvas(canvasRef, { width: 600, height: 600 });
 
     // Native example: TrimPath.cpp
 
@@ -48,17 +44,12 @@ const Example = () => {
     canvas.add(shape1);
     canvas.add(shape2);
     canvas.render();
+
+    return () => canvas.destroy();
   }, [TVG]);
 
   if (!TVG) return null;
-  return (
-    <TVG.Canvas
-      ref={canvasRef}
-      width={600}
-      height={600}
-      style={{ width: '100%', aspectRatio: 1 }}
-    />
-  );
+  return <Canvas ref={canvasRef} style={{ width: '100%', aspectRatio: 1 }} />;
 };
 
 export default Example;

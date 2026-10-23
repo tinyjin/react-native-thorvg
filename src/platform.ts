@@ -1,5 +1,5 @@
 import { init as initWebCanvas } from '@thorvg/webcanvas';
-import { Canvas } from './components/Canvas';
+import { Canvas } from './web/Canvas';
 import type { InitOptions, ThorVG } from './types';
 
 export { ThorVGError, ThorVGResultCode } from '@thorvg/webcanvas';

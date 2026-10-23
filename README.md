@@ -16,22 +16,24 @@ npm install @thorvg/react-native-thorvg
 
 ```tsx
 import { useEffect, useRef } from 'react';
-import { useThorVG, type Canvas } from '@thorvg/react-native-thorvg';
+import { Canvas, useThorVG } from '@thorvg/react-native-thorvg';
 
 const Example = () => {
   const TVG = useThorVG({ renderer: 'sw' });
-  const canvas = useRef<Canvas>(null);
+  const view = useRef<Canvas>(null);
 
   useEffect(() => {
-    if (!TVG || !canvas.current) return;
+    if (!TVG) return;
+    const canvas = new TVG.Canvas(view, { width: 200, height: 160 });
 
     const shape = new TVG.Shape();
     shape.appendRect(20, 20, 160, 120, { rx: 16, ry: 16 }).fill(37, 99, 235, 255);
-    canvas.current.add(shape).render();
+    canvas.add(shape).render();
+
+    return () => canvas.destroy();
   }, [TVG]);
 
-  if (!TVG) return null;
-  return <TVG.Canvas ref={canvas} style={{ width: 200, height: 160 }} />;
+  return <Canvas ref={view} style={{ width: 200, height: 160 }} />;
 }
 ```
 
@@ -55,7 +57,7 @@ The Core API is compatible with [`@thorvg/webcanvas`](https://www.npmjs.com/pack
 | Prop | Description |
 | --- | --- |
 | `androidBackingView` | `'TextureView'` (default) or `'SurfaceView'`. A `SurfaceView` composites on its own layer and does not blend with views behind it. |
-| `ref` | Receives the `Canvas` instance. |
+| `ref` | Receives the view that `new TVG.Canvas(ref, options)` draws into. |
 
 Note: Video playback and FontProvider aren't supported.
 
@@ -66,16 +68,19 @@ ThorVG provides a powerful Lottie playback runtime. You can run Lottie animation
 
 ```tsx
 useEffect(() => {
-  if (!TVG || !canvas.current) return;
-  const target = canvas.current;
+  if (!TVG) return;
+  const canvas = new TVG.Canvas(view, { width: 200, height: 200 });
 
   const animation = new TVG.LottieAnimation();
   animation.load(JSON.stringify(lottieJson));
   animation.picture!.size(200, 200);
-  target.add(animation.picture!);
-  animation.play(() => target.update().render());
+  canvas.add(animation.picture!);
+  animation.play(() => canvas.update().render());
 
-  return () => animation.dispose();
+  return () => {
+    animation.dispose();
+    canvas.destroy();
+  };
 }, [TVG]);
 ```
 

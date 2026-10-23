@@ -1,11 +1,10 @@
 import NativeThorVG from './specs/NativeThorVG';
-import { Canvas } from './components/Canvas';
 import { setGlobalErrorHandler } from './native/errors';
 import { getJSI } from './native/jsi';
 import * as constants from './native/generated/constants';
 import { Accessor } from './native/core/Accessor';
 import { Animation } from './native/core/Animation';
-import { setRenderer } from './native/core/Canvas';
+import { Canvas, setRenderer } from './native/core/Canvas';
 import { ConicGradient } from './native/core/ConicGradient';
 import { Font } from './native/core/Font';
 import { LinearGradient } from './native/core/LinearGradient';
