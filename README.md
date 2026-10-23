@@ -46,6 +46,10 @@ const Example = () => {
 ### Canvas
 The Core API is compatible with [`@thorvg/webcanvas`](https://www.npmjs.com/package/@thorvg/webcanvas). On iOS and Android follow same classes run on the native ThorVG engine through [JSI](https://reactnative.dev/architecture/glossary#javascript-interfaces-jsi).
 
+<p align="center">
+  <img width="600" src="docs/static/img/architecture.svg" alt="react-native-thorvg architecture">
+</p>
+
 **Properties**
 
 | Prop | Description |
@@ -77,15 +81,21 @@ useEffect(() => {
 
 Note: Default Lottie audio playback is not available. Use `LottieAnimation.resolver()` to enable.
 
-## Supported Platforms
+## Platform Notes
 
 ## Android
 
-Canvases render into a `TextureView` by default. Android supports `'gl'` (OpenGL ES, the default) and `'sw'`. Other renderers fall back to `'sw'`.
+The JSI binding calls the ThorVG C API from `@thorvg/react-native-thorvg-core-android` and draws into the view's Android `Surface`.
+
+- Canvases render into a `TextureView` by default.
+- Android supports `'gl'` (OpenGL ES) and `'sw'`.
 
 ## iOS
 
-Run `pod install` in your `ios` directory after installing the package. iOS supports `'wg'` (WebGPU on Metal, the default) and `'sw'`. Other renderers fall back to `'sw'`.
+The JSI binding calls the ThorVG C API from `@thorvg/react-native-thorvg-core-ios` and draws into the view's `CAMetalLayer`.
+
+- Run `pod install` in your `ios` directory after installing the package.
+- iOS supports `'wg'` (WebGPU on Metal) and `'sw'`.
 
 ## Web
 
