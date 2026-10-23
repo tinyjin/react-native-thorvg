@@ -13,8 +13,8 @@ if (!version) throw new Error('Could not read the ThorVG version from thorvg/mes
 
 const targets = [
   {
-    name: '@thorvg/react-native-thorvg-core-ios',
-    directory: 'react-native-thorvg-core-ios',
+    name: '@thorvg/react-native-thorvg-ios',
+    directory: 'react-native-thorvg-ios',
     description: 'Prebuilt ThorVG xcframework for @thorvg/react-native-thorvg',
     source: join(libs, 'ios'),
     required: ['thorvg.xcframework/Info.plist', 'wgpu-stub.xcframework/Info.plist', 'VERSION'],
@@ -29,8 +29,8 @@ const targets = [
     required: ['ios/wgpu.xcframework/Info.plist', 'VERSION'],
   },
   {
-    name: '@thorvg/react-native-thorvg-core-android',
-    directory: 'react-native-thorvg-core-android',
+    name: '@thorvg/react-native-thorvg-android',
+    directory: 'react-native-thorvg-android',
     description: 'Prebuilt ThorVG static libraries for @thorvg/react-native-thorvg',
     source: join(libs, 'android'),
     required: [

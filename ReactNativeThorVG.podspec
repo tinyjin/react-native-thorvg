@@ -10,12 +10,12 @@ end
 
 thorvg_libs = File.join(__dir__, "libs", "ios")
 unless File.exist?(File.join(thorvg_libs, "thorvg.xcframework"))
-  core = resolve_node_package.call("@thorvg/react-native-thorvg-core-ios")
+  core = resolve_node_package.call("@thorvg/react-native-thorvg-ios")
   thorvg_libs = File.join(core, "libs") if core
 end
 
 unless File.exist?(File.join(thorvg_libs, "thorvg.xcframework"))
-  raise "ReactNativeThorVG: thorvg.xcframework not found. Run `yarn build:thorvg ios` or install @thorvg/react-native-thorvg-core-ios."
+  raise "ReactNativeThorVG: thorvg.xcframework not found. Run `yarn build:thorvg ios` or install @thorvg/react-native-thorvg-ios."
 end
 
 vendored = File.join(__dir__, "libs", "ios")

@@ -99,14 +99,14 @@ The Core API is compatible with [`@thorvg/webcanvas`](https://www.npmjs.com/pack
 
 ### Android
 
-The JSI binding calls the ThorVG C API from `@thorvg/react-native-thorvg-core-android` and draws into the view's Android `Surface`.
+The JSI binding calls the ThorVG C API from `@thorvg/react-native-thorvg-android` and draws into the view's Android `Surface`.
 
 - Canvases render into a `TextureView` by default.
 - Android supports `'gl'` (OpenGL ES) and `'sw'`.
 
 ### iOS
 
-The JSI binding calls the ThorVG C API from `@thorvg/react-native-thorvg-core-ios` and draws into the view's `CAMetalLayer`.
+The JSI binding calls the ThorVG C API from `@thorvg/react-native-thorvg-ios` and draws into the view's `CAMetalLayer`.
 
 - Run `pod install` in your `ios` directory after installing the package.
 - iOS supports `'sw'` and `'wg'` (WebGPU on Metal).
