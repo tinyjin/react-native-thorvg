@@ -36,6 +36,8 @@ class Gpu {
 Gpu* platformGpu();
 
 void setScheduler(std::function<void(std::function<void()>)> scheduler);
+void runOnJS(std::function<void()> task);
+std::recursive_mutex& engineMutex();
 
 class CanvasHost : public std::enable_shared_from_this<CanvasHost> {
  public:
@@ -51,6 +53,7 @@ class CanvasHost : public std::enable_shared_from_this<CanvasHost> {
 
   Tvg_Result resize(uint32_t width, uint32_t height);
   Tvg_Result render();
+  Tvg_Result renderNow();
   Tvg_Result add(Tvg_Paint paint);
   Tvg_Result remove(Tvg_Paint paint);
   Tvg_Result update();

@@ -224,6 +224,11 @@ export class Canvas {
     }
   }
 
+  /** @internal */
+  public get _handle(): CanvasHandle | null {
+    return this.#handle;
+  }
+
   public get renderer(): string {
     return this.#renderer;
   }

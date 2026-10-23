@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "ThorVGHandle.h"
+#include "ThorVGPlayer.h"
 #include "ThorVGSurface.h"
 
 #define THORVG_TTF_LOADER_SUPPORT 1
@@ -152,6 +153,7 @@ class CanvasState : public jsi::NativeState {
   }
 
   CanvasHost* host() const { return host_.get(); }
+  std::shared_ptr<CanvasHost> shared() const { return host_; }
 
   void destroy() {
     if (!host_) return;
@@ -161,6 +163,26 @@ class CanvasState : public jsi::NativeState {
 
  private:
   std::shared_ptr<CanvasHost> host_;
+};
+
+class PlayerState : public jsi::NativeState {
+ public:
+  explicit PlayerState(std::shared_ptr<Player> player) : player_(std::move(player)) {}
+  ~PlayerState() override {
+    if (!player_) return;
+    deferRelease([player = std::move(player_)] { player->destroy(); });
+  }
+
+  Player* player() const { return player_.get(); }
+
+  void destroy() {
+    if (!player_) return;
+    player_->destroy();
+    player_.reset();
+  }
+
+ private:
+  std::shared_ptr<Player> player_;
 };
 
 CanvasState* canvasState(jsi::Runtime& rt, const jsi::Value& value) {
@@ -258,6 +280,7 @@ class Builder {
         jsi::Function::createFromHostFunction(
             rt_, jsi::PropNameID::forAscii(rt_, name), argc,
             [body = std::move(body)](jsi::Runtime& rt, const jsi::Value& self, const jsi::Value* args, size_t count) {
+              std::lock_guard<std::recursive_mutex> lock(engineMutex());
               drainReleases();
               return body(rt, self, args, count);
             }));
@@ -732,6 +755,91 @@ void installHandles(Builder& b) {
   });
 }
 
+Player* player(jsi::Runtime& rt, const jsi::Value& value) {
+  if (!value.isObject()) throw jsi::JSError(rt, "ThorVG: expected a player handle");
+  auto object = value.getObject(rt);
+  if (!object.hasNativeState<PlayerState>(rt)) throw jsi::JSError(rt, "ThorVG: expected a player handle");
+  return object.getNativeState<PlayerState>(rt)->player();
+}
+
+void installPlayer(Builder& b) {
+  b.fn("player_create", 2, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) -> jsi::Value {
+    auto host = canvasState(rt, at(args, count, 0))->shared();
+    auto animation = handlePtr<Tvg_Animation>(rt, at(args, count, 1));
+    if (!host || !animation) return jsi::Value::null();
+    jsi::Object object(rt);
+    object.setNativeState(rt, std::make_shared<PlayerState>(std::make_shared<Player>(host, animation)));
+    return object;
+  });
+
+  b.fn("player_destroy", 1, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) {
+    const auto& value = at(args, count, 0);
+    if (!value.isObject()) return jsi::Value::undefined();
+    auto object = value.getObject(rt);
+    if (object.hasNativeState<PlayerState>(rt)) object.getNativeState<PlayerState>(rt)->destroy();
+    return jsi::Value::undefined();
+  });
+
+  b.fn("player_configure", 6, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) {
+    if (auto p = player(rt, at(args, count, 0))) {
+      p->configure(Arg<float>::get(rt, at(args, count, 1)), Arg<bool>::get(rt, at(args, count, 2)),
+                   static_cast<PlayMode>(Arg<int>::get(rt, at(args, count, 3))), Arg<float>::get(rt, at(args, count, 4)),
+                   Arg<float>::get(rt, at(args, count, 5)));
+    }
+    return jsi::Value::undefined();
+  });
+
+  b.fn("player_set_listener", 3, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) {
+    auto p = player(rt, at(args, count, 0));
+    if (!p) return jsi::Value::undefined();
+    auto id = number(at(args, count, 1));
+    if (!id) {
+      p->setListener(nullptr, false);
+      return jsi::Value::undefined();
+    }
+    p->setListener(
+        [id](const char* event, float frame) {
+          runOnJS([id, event = std::string(event), frame] {
+            if (!gRuntime) return;
+            auto& rt = *gRuntime;
+            dispatch(rt, id, {jsi::String::createFromUtf8(rt, event), jsi::Value(static_cast<double>(frame))});
+          });
+        },
+        Arg<bool>::get(rt, at(args, count, 2)));
+    return jsi::Value::undefined();
+  });
+
+  b.fn("player_play", 1, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) {
+    if (auto p = player(rt, at(args, count, 0))) p->play();
+    return jsi::Value::undefined();
+  });
+
+  b.fn("player_pause", 1, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) {
+    if (auto p = player(rt, at(args, count, 0))) p->pause();
+    return jsi::Value::undefined();
+  });
+
+  b.fn("player_reset", 1, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) {
+    if (auto p = player(rt, at(args, count, 0))) p->reset();
+    return jsi::Value::undefined();
+  });
+
+  b.fn("player_seek", 2, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) {
+    if (auto p = player(rt, at(args, count, 0))) p->seek(Arg<float>::get(rt, at(args, count, 1)));
+    return jsi::Value::undefined();
+  });
+
+  b.fn("player_frame", 1, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) {
+    auto p = player(rt, at(args, count, 0));
+    return jsi::Value(p ? static_cast<double>(p->frame()) : 0.0);
+  });
+
+  b.fn("player_playing", 1, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) {
+    auto p = player(rt, at(args, count, 0));
+    return jsi::Value(p && p->playing());
+  });
+}
+
 std::string engineVersion() {
   uint32_t major = 0;
   uint32_t minor = 0;
@@ -774,6 +882,7 @@ void install(jsi::Runtime& rt, std::shared_ptr<facebook::react::CallInvoker> cal
   installScene(builder);
   installText(builder);
   installAnimation(builder);
+  installPlayer(builder);
   installAccessor(builder);
   module.setProperty(rt, "version", jsi::String::createFromUtf8(rt, engineVersion()));
 

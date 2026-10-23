@@ -1,8 +1,10 @@
 declare const handleBrand: unique symbol;
 declare const canvasBrand: unique symbol;
+declare const playerBrand: unique symbol;
 
 export type Handle = { readonly [handleBrand]: true };
 export type CanvasHandle = { readonly [canvasBrand]: true };
+export type PlayerHandle = { readonly [playerBrand]: true };
 
 type Result = number;
 type Bytes = ArrayBufferView | ArrayBuffer;
@@ -34,6 +36,24 @@ export interface ThorVGJSI {
     w: number,
     h: number
   ): Result;
+
+  player_create(canvas: CanvasHandle, animation: Handle): PlayerHandle | null;
+  player_destroy(player: PlayerHandle): void;
+  player_configure(
+    player: PlayerHandle,
+    speed: number,
+    loop: boolean,
+    mode: number,
+    start: number,
+    end: number
+  ): void;
+  player_set_listener(player: PlayerHandle, id: number, frames: boolean): void;
+  player_play(player: PlayerHandle): void;
+  player_pause(player: PlayerHandle): void;
+  player_reset(player: PlayerHandle): void;
+  player_seek(player: PlayerHandle, frame: number): void;
+  player_frame(player: PlayerHandle): number;
+  player_playing(player: PlayerHandle): boolean;
 
   tvg_paint_ref(paint: Handle): number;
   tvg_paint_unref(paint: Handle, free: boolean): number;

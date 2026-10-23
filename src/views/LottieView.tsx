@@ -10,9 +10,10 @@ import { assignRef } from '../canvas/assignRef';
 import { Canvas } from '../canvas/Canvas';
 import { useThorVG } from '../useThorVG';
 import { place, type ContentFit, type ContentPosition } from './fit';
+import { createPlayer, type Player, type PlayMode } from './player';
 import { loadSource, sourceKey, type LottieSource } from './source';
 
-export type LottieMode = 'forward' | 'reverse' | 'bounce' | 'reverse-bounce';
+export type LottieMode = PlayMode;
 
 export interface LottieViewHandle {
   readonly animation: LottieAnimation | null;
@@ -45,13 +46,9 @@ export interface LottieViewProps extends ViewProps {
 interface State {
   canvas: WebCanvas;
   animation: LottieAnimation | null;
+  player: Player | null;
   info: AnimationInfo | null;
   slot: number | null;
-  frame: number;
-  direction: 1 | -1;
-  playing: boolean;
-  rafId: number;
-  last: number;
   layout: { width: number; height: number };
   size: { width: number; height: number };
 }
@@ -116,12 +113,10 @@ export function LottieView({
   const props = useRef(latest);
   props.current = latest;
 
-  const draw = useCallback(() => {
+  const redraw = useCallback(() => {
     const current = state.current;
-    if (!current?.info || !current.animation) return;
-    current.animation.frame(current.frame);
-    current.canvas.update().render();
-    props.current.onFrame?.(current.frame);
+    if (!current?.info || !current.player) return;
+    current.player.seek(current.player.frame());
   }, []);
 
   const layout = useCallback(() => {
@@ -141,53 +136,17 @@ export function LottieView({
     current.canvas.update().render();
   }, []);
 
-  const tick = useCallback(
-    (time: number) => {
-      const current = state.current;
-      if (!current?.info || !current.playing) return;
-      const { loop: repeat, speed: rate, mode: playMode } = props.current;
-      const [start, end] = range(current, props.current.segment);
-      const elapsed = current.last ? (time - current.last) / 1000 : 0;
-      current.last = time;
-
-      let frame =
-        current.frame + elapsed * current.info.fps * rate * current.direction;
-      const bounce = playMode === 'bounce' || playMode === 'reverse-bounce';
-      if (frame > end || frame < start) {
-        const finished = bounce
-          ? (playMode === 'bounce') === (current.direction === -1)
-          : true;
-        if (bounce && (!finished || repeat)) {
-          current.direction = current.direction === 1 ? -1 : 1;
-          frame = frame > end ? end : start;
-          if (finished) props.current.onLoop?.();
-        } else if (repeat) {
-          frame = current.direction === 1 ? start : end;
-          props.current.onLoop?.();
-        } else {
-          current.frame = frame > end ? end : start;
-          current.playing = false;
-          draw();
-          props.current.onComplete?.();
-          return;
-        }
-      }
-      current.frame = frame;
-      draw();
-      current.rafId = requestAnimationFrame(tick);
-    },
-    [draw]
-  );
-
-  const reset = useCallback(() => {
+  const configure = useCallback(() => {
     const current = state.current;
-    if (!current?.info) return;
+    if (!current?.info || !current.player) return;
     const [start, end] = range(current, props.current.segment);
-    const reverse =
-      props.current.mode === 'reverse' ||
-      props.current.mode === 'reverse-bounce';
-    current.direction = reverse ? -1 : 1;
-    current.frame = reverse ? end : start;
+    current.player.configure({
+      speed: props.current.speed,
+      loop: props.current.loop,
+      mode: props.current.mode,
+      start,
+      end,
+    });
   }, []);
 
   const handle = useRef<LottieViewHandle>({
@@ -198,28 +157,18 @@ export function LottieView({
       return state.current?.canvas ?? null;
     },
     play() {
-      const current = state.current;
-      if (!current?.info || current.playing) return;
-      current.playing = true;
-      current.last = 0;
-      current.rafId = requestAnimationFrame(tick);
+      state.current?.player?.play();
     },
     pause() {
-      const current = state.current;
-      if (!current) return;
-      current.playing = false;
-      cancelAnimationFrame(current.rafId);
+      state.current?.player?.pause();
     },
     stop() {
-      handle.current.pause();
-      reset();
-      draw();
+      const player = state.current?.player;
+      player?.pause();
+      player?.reset();
     },
     seek(frame: number) {
-      const current = state.current;
-      if (!current?.info) return;
-      current.frame = frame;
-      draw();
+      state.current?.player?.seek(frame);
     },
   });
 
@@ -234,13 +183,9 @@ export function LottieView({
     state.current = {
       canvas,
       animation: null,
+      player: null,
       info: null,
       slot: null,
-      frame: 0,
-      direction: 1,
-      playing: false,
-      rafId: 0,
-      last: 0,
       layout: {
         width: view.current?.width ?? 0,
         height: view.current?.height ?? 0,
@@ -250,7 +195,7 @@ export function LottieView({
     return () => {
       const current = state.current;
       state.current = null;
-      if (current) cancelAnimationFrame(current.rafId);
+      current?.player?.destroy();
       current?.animation?.dispose();
       canvas.destroy();
     };
@@ -264,10 +209,10 @@ export function LottieView({
     loadSource(props.current.source).then(
       (data) => {
         if (!active || state.current !== current) return;
-        handle.current.pause();
         const animation = new TVG.LottieAnimation();
         animation.load(data);
         const previous = current.animation;
+        current.player?.destroy();
         if (previous?.picture) current.canvas.remove(previous.picture);
         previous?.dispose();
         current.animation = animation;
@@ -275,6 +220,7 @@ export function LottieView({
         current.slot = null;
         current.size = animation.picture?.size() ?? { width: 0, height: 0 };
         if (animation.picture) current.canvas.add(animation.picture);
+        current.player = createPlayer(current.canvas, animation);
         setLoaded((n) => n + 1);
         if (current.info) props.current.onLoad?.(current.info);
       },
@@ -297,8 +243,8 @@ export function LottieView({
     if (current.slot !== null) animation.del(current.slot);
     current.slot = animation.gen(slots);
     animation.apply(current.slot);
-    draw();
-  }, [loaded, slots, draw]);
+    redraw();
+  }, [loaded, slots, redraw]);
 
   useEffect(() => {
     layout();
@@ -306,20 +252,35 @@ export function LottieView({
 
   const segmentKey = Array.isArray(segment) ? segment.join(':') : segment;
   useEffect(() => {
+    configure();
+  }, [loaded, speed, loop, configure]);
+
+  const hasFrameListener = !!onFrame;
+  useEffect(() => {
+    state.current?.player?.setEvents({
+      onLoop: () => props.current.onLoop?.(),
+      onComplete: () => props.current.onComplete?.(),
+      onFrame: hasFrameListener
+        ? (frame) => props.current.onFrame?.(frame)
+        : undefined,
+    });
+  }, [loaded, hasFrameListener]);
+
+  useEffect(() => {
     const current = state.current;
-    if (!current?.info) return;
+    const player = current?.player;
+    if (!current?.info || !player) return;
+    configure();
     if (progress !== undefined) {
-      handle.current.pause();
+      player.pause();
       const [start, end] = range(current, props.current.segment);
       const t = Math.min(1, Math.max(0, progress));
-      current.frame = start + (end - start) * t;
-      draw();
+      player.seek(start + (end - start) * t);
       return;
     }
-    reset();
-    draw();
-    if (autoplay) handle.current.play();
-  }, [loaded, progress, segmentKey, mode, autoplay, draw, reset]);
+    player.reset();
+    if (autoplay) player.play();
+  }, [loaded, progress, segmentKey, mode, autoplay, configure]);
 
   const handleLayout = useCallback(
     (event: LayoutChangeEvent) => {

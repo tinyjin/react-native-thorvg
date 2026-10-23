@@ -15,8 +15,10 @@ add_library(
   SHARED
   ../cpp/ThorVGBindings.cpp
   ../cpp/ThorVGHandle.cpp
+  ../cpp/ThorVGPlayer.cpp
   ../cpp/ThorVGSurface.cpp
   src/main/cpp/AndroidSurface.cpp
+  src/main/cpp/AndroidTicker.cpp
   src/main/cpp/OnLoad.cpp
 )
 

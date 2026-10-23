@@ -39,6 +39,16 @@ void setScheduler(std::function<void(std::function<void()>)> scheduler) {
   gScheduler = std::move(scheduler);
 }
 
+void runOnJS(std::function<void()> task) {
+  std::lock_guard<std::mutex> lock(gSchedulerMutex);
+  if (gScheduler) gScheduler(std::move(task));
+}
+
+std::recursive_mutex& engineMutex() {
+  static std::recursive_mutex mutex;
+  return mutex;
+}
+
 CanvasHost::CanvasHost(int surfaceId, Tvg_Engine_Option option, Renderer renderer) : surfaceId_(surfaceId) {
   auto* gpu = renderer == Renderer::Sw ? nullptr : platformGpu();
   if (gpu && gpu->renderer() == renderer) {
@@ -97,6 +107,23 @@ Tvg_Result CanvasHost::render() {
   drawn_ = true;
   presentLocked();
   return result;
+}
+
+Tvg_Result CanvasHost::renderNow() {
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!canvas_) return TVG_RESULT_INSUFFICIENT_CONDITION;
+    if (gpu_ && gpu_->renderer() != Renderer::Gl) {
+      drawn_ = true;
+      if (!bindLocked()) return TVG_RESULT_SUCCESS;
+      tvg_canvas_update(canvas_);
+      tvg_canvas_draw(canvas_, true);
+      tvg_canvas_sync(canvas_);
+      surface_->swap();
+      return TVG_RESULT_SUCCESS;
+    }
+  }
+  return render();
 }
 
 Tvg_Result CanvasHost::add(Tvg_Paint paint) {
@@ -162,6 +189,7 @@ void CanvasHost::requestFrameLocked() {
 }
 
 void CanvasHost::drawFrame() {
+  std::lock_guard<std::recursive_mutex> engine(engineMutex());
   std::lock_guard<std::mutex> lock(mutex_);
   framePending_ = false;
   if (!canvas_ || !bindLocked()) return;
