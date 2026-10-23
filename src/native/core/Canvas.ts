@@ -1,10 +1,19 @@
-import type { CanvasOptions } from '@thorvg/webcanvas';
-import { PixelRatio } from 'react-native';
+import type { CanvasOptions, InitOptions } from '@thorvg/webcanvas';
+import { PixelRatio, Platform } from 'react-native';
 import type { Paint } from './Paint';
 import { Scene } from './Scene';
 import { checkResult, handleError } from '../errors';
 import { EngineOption } from '../generated/constants';
 import { getJSI, type CanvasHandle } from '../jsi';
+
+type Renderer = NonNullable<InitOptions['renderer']>;
+
+const platformRenderer: Renderer = Platform.OS === 'android' ? 'gl' : 'wg';
+let preferredRenderer: Renderer = platformRenderer;
+
+export function setRenderer(renderer: Renderer | undefined): void {
+  preferredRenderer = renderer ?? platformRenderer;
+}
 
 function devicePixelRatio(): number {
   return 1 + (PixelRatio.get() - 1) * 0.75;
@@ -12,6 +21,7 @@ function devicePixelRatio(): number {
 
 export class Canvas {
   #handle: CanvasHandle | null = null;
+  #renderer: Renderer = 'sw';
   #mainScene: Scene | null = null;
   #enableDevicePixelRatio: boolean;
   #logicalWidth: number;
@@ -32,15 +42,20 @@ export class Canvas {
     this.#enableDevicePixelRatio = enableDevicePixelRatio;
 
     const jsi = getJSI();
-    const handle = jsi.canvas_create(surfaceId, engineOption);
+    const handle = jsi.canvas_create(
+      surfaceId,
+      engineOption,
+      preferredRenderer
+    );
     if (!handle) {
       handleError(
-        'Failed to create canvas with sw renderer',
+        `Failed to create canvas with ${preferredRenderer} renderer`,
         'Canvas constructor'
       );
       return;
     }
     this.#handle = handle;
+    this.#renderer = jsi.canvas_renderer(handle) as Renderer;
 
     this.#currentDPR = enableDevicePixelRatio ? devicePixelRatio() : 1;
     this.#applySize();
@@ -163,7 +178,7 @@ export class Canvas {
   }
 
   public get renderer(): string {
-    return 'sw';
+    return this.#renderer;
   }
 
   public get dpr(): number {

@@ -81,9 +81,7 @@ Note: Default Lottie audio playback is not available. Use `LottieAnimation.resol
 
 ## Android
 
-Canvases render with the software engine into a `TextureView` by default. GPU rendering (OpenGL ES) is planned.
-
-Note: The `renderer` option is ignored on Android.
+Canvases render into a `TextureView` by default. Android supports `'gl'` (OpenGL ES, the default) and `'sw'`. Other renderers fall back to `'sw'`.
 
 ## iOS
 

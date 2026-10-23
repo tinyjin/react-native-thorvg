@@ -19,7 +19,7 @@ RCT_EXPORT_MODULE(ThorVG)
 - (void)installJSIBindingsWithRuntime:(facebook::jsi::Runtime &)runtime
                           callInvoker:(const std::shared_ptr<facebook::react::CallInvoker> &)callInvoker
 {
-  thorvg::rn::install(runtime);
+  thorvg::rn::install(runtime, callInvoker);
 }
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:

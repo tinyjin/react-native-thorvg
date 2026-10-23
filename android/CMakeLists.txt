@@ -16,6 +16,7 @@ add_library(
   ../cpp/ThorVGBindings.cpp
   ../cpp/ThorVGHandle.cpp
   ../cpp/ThorVGSurface.cpp
+  src/main/cpp/AndroidSurface.cpp
   src/main/cpp/OnLoad.cpp
 )
 
@@ -37,5 +38,6 @@ target_link_libraries(
   fbjni::fbjni
   thorvg
   android
+  EGL
   log
 )

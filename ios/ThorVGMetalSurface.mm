@@ -84,6 +84,11 @@ class MetalSurface final : public Surface {
 
 }
 
+Gpu *platformGpu()
+{
+  return nullptr;
+}
+
 std::shared_ptr<Surface> makeMetalSurface(CAMetalLayer *layer)
 {
   return std::make_shared<MetalSurface>(layer);

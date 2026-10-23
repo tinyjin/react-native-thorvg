@@ -659,9 +659,12 @@ void installAccessor(Builder& b) {
 }
 
 void installCanvas(Builder& b) {
-  b.fn("canvas_create", 2, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) -> jsi::Value {
+  b.fn("canvas_create", 3, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) -> jsi::Value {
     auto surfaceId = Arg<int>::get(rt, at(args, count, 0));
-    auto host = std::make_shared<CanvasHost>(surfaceId, Arg<Tvg_Engine_Option>::get(rt, at(args, count, 1)));
+    const auto& name = at(args, count, 2);
+    auto renderer = name.isString() ? rendererFromName(name.getString(rt).utf8(rt)) : Renderer::Sw;
+    auto host =
+        std::make_shared<CanvasHost>(surfaceId, Arg<Tvg_Engine_Option>::get(rt, at(args, count, 1)), renderer);
     if (!host->valid()) return jsi::Value::null();
     SurfaceRegistry::shared().bindCanvas(surfaceId, host);
     jsi::Object object(rt);
@@ -672,6 +675,11 @@ void installCanvas(Builder& b) {
   b.fn("canvas_destroy", 1, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) {
     canvasState(rt, at(args, count, 0))->destroy();
     return jsi::Value::undefined();
+  });
+
+  b.fn("canvas_renderer", 1, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) {
+    auto host = canvasHost(rt, at(args, count, 0));
+    return jsi::String::createFromAscii(rt, rendererName(host ? host->renderer() : Renderer::Sw));
   });
 
   b.fn("canvas_resize", 3, [](jsi::Runtime& rt, const jsi::Value&, Args args, size_t count) {
@@ -736,7 +744,7 @@ std::string engineVersion() {
 
 }
 
-void install(jsi::Runtime& rt) {
+void install(jsi::Runtime& rt, std::shared_ptr<facebook::react::CallInvoker> callInvoker) {
   static std::once_flag engine;
   std::call_once(engine, [] {
     tvg_engine_init(0);
@@ -744,6 +752,9 @@ void install(jsi::Runtime& rt) {
   });
 
   gRuntime = &rt;
+  setScheduler([callInvoker = std::move(callInvoker)](std::function<void()> task) {
+    callInvoker->invokeAsync(std::move(task));
+  });
 
   jsi::Object module(rt);
   Builder builder(rt, module);

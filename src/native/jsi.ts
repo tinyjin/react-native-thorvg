@@ -13,8 +13,13 @@ export interface ThorVGJSI {
   disown(handle: Handle): void;
   address(handle: Handle): number;
 
-  canvas_create(surfaceId: number, engineOption: number): CanvasHandle | null;
+  canvas_create(
+    surfaceId: number,
+    engineOption: number,
+    renderer: string
+  ): CanvasHandle | null;
   canvas_destroy(canvas: CanvasHandle): void;
+  canvas_renderer(canvas: CanvasHandle): string;
   canvas_resize(canvas: CanvasHandle, width: number, height: number): Result;
   canvas_render(canvas: CanvasHandle): Result;
   tvg_canvas_add(canvas: CanvasHandle, paint: Handle): Result;

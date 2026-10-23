@@ -18,7 +18,6 @@ MESON_OPTIONS=(
   -Db_ndebug=true
   -Ddefault_library=static
   -Dstatic=true
-  -Dengines=cpu
   -Dloaders=svg,png,jpg,lottie,ttf,otf,webp
   -Dsavers=
   -Dthreads=false
@@ -26,7 +25,6 @@ MESON_OPTIONS=(
   -Dpartial=true
   -Dfile=false
   -Dlog=false
-  -Dextra=lottie_exp
   -Dtools=
   -Dtests=false
 )
@@ -39,7 +37,7 @@ fi
 VERSION="$(git -C "$THORVG" describe --tags --always)"
 
 build_slice() {
-  local name="$1" constants="$2" simd="$3"
+  local name="$1" constants="$2" simd="$3" engines="$4" extra="$5"
   local dir="$BUILD/$name"
 
   rm -rf "$dir"
@@ -50,6 +48,8 @@ build_slice() {
     --cross-file "$dir/constants.ini" \
     --cross-file "$CROSS/$name.txt" \
     "${MESON_OPTIONS[@]}" \
+    -Dengines="$engines" \
+    -Dextra="$extra" \
     -Dsimd="$simd" > "$dir/setup.log"
   ninja -C "$dir/build" > "$dir/ninja.log"
 
@@ -80,7 +80,7 @@ build_android() {
     echo "  building $abi"
     build_slice "android-$abi" "[constants]
 toolchain = '$toolchain'
-api = '$ANDROID_API'" "$simd"
+api = '$ANDROID_API'" "$simd" cpu,gl lottie_exp,opengl_es
     mkdir -p "$LIBS/android/$abi"
     "$toolchain/llvm-strip" --strip-debug "$BUILD/android-$abi/libthorvg.a" -o "$LIBS/android/$abi/libthorvg.a"
   done
@@ -102,7 +102,7 @@ build_ios() {
 toolchain = '$toolchain'
 ios_min = '$IOS_MIN'
 iphoneos_sdk = '$iphoneos'
-simulator_sdk = '$simulator'" "$simd"
+simulator_sdk = '$simulator'" "$simd" cpu lottie_exp
     strip -S "$BUILD/$slice/libthorvg.a" 2>/dev/null
   done
 

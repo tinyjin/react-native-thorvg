@@ -5,9 +5,9 @@ sidebar_position: 4
 
 ## Android
 
-Canvases render with the software engine into a `TextureView` by default. `androidBackingView="SurfaceView"` draws into a `SurfaceView` instead. GPU rendering (OpenGL ES) is planned.
+Canvases render into a `TextureView` by default. `androidBackingView="SurfaceView"` draws into a `SurfaceView` instead.
 
-The `renderer` option is ignored on Android.
+Android supports `'gl'` (OpenGL ES, the default) and `'sw'`. Other renderers fall back to `'sw'`.
 
 ## iOS
 

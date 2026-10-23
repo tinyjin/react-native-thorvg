@@ -1,8 +1,10 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -10,15 +12,34 @@
 
 namespace thorvg::rn {
 
+enum class Renderer { Sw, Gl, Wg };
+
+const char* rendererName(Renderer renderer);
+Renderer rendererFromName(const std::string& name);
+
 class Surface {
  public:
   virtual ~Surface() = default;
   virtual void present(const uint32_t* pixels, uint32_t width, uint32_t height) = 0;
+  virtual Tvg_Result target(Tvg_Canvas, uint32_t, uint32_t) { return TVG_RESULT_NOT_SUPPORTED; }
+  virtual void swap() {}
 };
 
-class CanvasHost {
+class Gpu {
  public:
-  CanvasHost(int surfaceId, Tvg_Engine_Option option);
+  virtual ~Gpu() = default;
+  virtual Renderer renderer() const = 0;
+  virtual Tvg_Canvas create(Tvg_Engine_Option option) = 0;
+  virtual void bind(Surface* surface) = 0;
+};
+
+Gpu* platformGpu();
+
+void setScheduler(std::function<void(std::function<void()>)> scheduler);
+
+class CanvasHost : public std::enable_shared_from_this<CanvasHost> {
+ public:
+  CanvasHost(int surfaceId, Tvg_Engine_Option option, Renderer renderer);
   ~CanvasHost();
 
   CanvasHost(const CanvasHost&) = delete;
@@ -26,6 +47,7 @@ class CanvasHost {
 
   int surfaceId() const { return surfaceId_; }
   bool valid() const { return canvas_ != nullptr; }
+  Renderer renderer() const { return gpu_ ? gpu_->renderer() : Renderer::Sw; }
 
   Tvg_Result resize(uint32_t width, uint32_t height);
   Tvg_Result render();
@@ -39,9 +61,12 @@ class CanvasHost {
 
  private:
   void presentLocked();
+  bool bindLocked();
 
   std::mutex mutex_;
   Tvg_Canvas canvas_ = nullptr;
+  Gpu* gpu_ = nullptr;
+  bool targeted_ = false;
   std::vector<uint32_t> buffer_;
   uint32_t width_ = 0;
   uint32_t height_ = 0;
