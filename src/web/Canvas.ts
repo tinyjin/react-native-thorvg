@@ -12,6 +12,7 @@ import {
   type CanvasTarget,
   unbindCanvas,
 } from '../canvas/CanvasTarget';
+import type { ThorVG } from '../types';
 
 const elements = new WeakMap<WebCanvas, unknown>();
 const subscriptions = new WeakMap<WebCanvas, () => void>();
@@ -25,7 +26,7 @@ function fit(element: unknown): void {
 }
 
 // The threaded build has its own Canvas class, so the view support extends whichever build is loaded.
-export function createCanvas(Base: typeof WebCanvas) {
+export function createCanvas(Base: typeof WebCanvas): ThorVG['Canvas'] {
   return class Canvas extends Base {
     constructor(
       target: string | WebCanvasTarget | CanvasTarget | CanvasRef,
